@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AttendEase — Attendance Management</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231a73e8'/><text y='24' x='6' font-size='22' font-family='sans-serif' font-weight='bold' fill='white'>A</text></svg>"/>
+<link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+
+<!-- ═══════════════ LOGIN ═══════════════ -->
+<div id="page-login" class="page active">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-logo">
+        <div class="login-logo-icon">A</div>
+        <span class="login-logo-text">AttendEase</span>
+      </div>
+      <p class="login-subtitle">Attendance management for your institution</p>
+
+      <div class="auth-tabs">
+        <div class="auth-tab active" id="tab-li" onclick="switchTab('li')">Sign in</div>
+        <div class="auth-tab" id="tab-rg" onclick="switchTab('rg')">Create account</div>
+      </div>
+
+      <div id="form-li">
+        <div class="field"><label>Email</label><input type="email" id="li-em" placeholder="you@iiitm.ac.in" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+        <div class="field"><label>Password</label><input type="password" id="li-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+        <button class="btn btn-primary btn-full" style="height:44px;font-size:15px;" onclick="doLogin()">Sign in</button>
+        <div style="text-align:center;margin-top:16px;">
+          <span style="font-size:13px;color:var(--text2);">No Firebase yet? </span>
+          <button class="btn btn-text" style="height:auto;padding:0;" onclick="demoMode()">Try demo →</button>
+        </div>
+      </div>
+
+      <div id="form-rg" style="display:none;">
+        <div class="field"><label>Full Name</label><input type="text" id="rg-nm" placeholder="Your name"/></div>
+        <div class="field"><label>Email</label><input type="email" id="rg-em" placeholder="you@iiitm.ac.in"/></div>
+        <div class="field"><label>Password</label><input type="password" id="rg-pw" placeholder="Min 6 characters"/></div>
+        <div class="field"><label>Role</label>
+          <select id="rg-rl">
+            <option value="teacher">Teacher</option>
+            <option value="admin">Admin</option>
+            <option value="student">Student</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-full" style="height:44px;font-size:15px;" onclick="doRegister()">Create account</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ APP ═══════════════ -->
+<div id="page-app" class="page">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sb-header">
+      <div class="sb-logo-box">A</div>
+      <span class="sb-logo-text">AttendEase</span>
+    </div>
+
+    <div class="sb-section">Main</div>
+    <button class="nav-item active" id="nav-dash" onclick="showView('dash')">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      Dashboard
+    </button>
+    <button class="nav-item" id="nav-mark" onclick="showView('mark')">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      Mark Attendance
+    </button>
+    <button class="nav-item" id="nav-hist" onclick="showView('hist')">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+      Attendance History
+    </button>
+    <button class="nav-item" id="nav-cls" onclick="showView('cls')">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12 12 0 01.665 6.479A12 12 0 0112 20.055a12 12 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+      Classes
+    </button>
+    <button class="nav-item" id="nav-notif" onclick="showView('notif')">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+      Notifications
+    </button>
+
+    <div class="sb-section">Account</div>
+    <button class="nav-item" id="nav-pw" onclick="showView('pw')">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+      Change Password
+    </button>
+    <button class="nav-item" id="nav-setup" onclick="showView('setup')">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      Firebase Setup
+    </button>
+
+    <div class="sb-bottom">
+      <div class="user-row" onclick="showView('pw')">
+        <div class="user-av" id="sb-av">?</div>
+        <div style="flex:1;min-width:0;">
+          <div class="user-name" id="sb-nm">—</div>
+          <div class="user-role" id="sb-rl">—</div>
+        </div>
+      </div>
+      <button class="btn btn-outlined btn-full btn-sm" style="margin-top:8px;border-radius:8px;" onclick="doLogout()">Sign out</button>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <div class="main">
+    <div class="topbar">
+      <span class="topbar-title" id="topbar-title">Dashboard</span>
+      <div class="topbar-actions">
+        <span id="topbar-date" style="font-size:13px;color:var(--text2);"></span>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="view-dash" class="view active">
+      <div class="stats-grid">
+        <div class="stat-card stat-blue"><div class="stat-label">My Classes</div><div class="stat-val" id="s-cls">—</div><div class="stat-sub">assigned</div></div>
+        <div class="stat-card stat-amber"><div class="stat-label">Sessions Today</div><div class="stat-val" id="s-td">—</div><div class="stat-sub">taken today</div></div>
+        <div class="stat-card stat-green"><div class="stat-label">Present Today</div><div class="stat-val" id="s-pr">—</div><div class="stat-sub">students</div></div>
+        <div class="stat-card stat-red"><div class="stat-label">Absent Today</div><div class="stat-val" id="s-ab">—</div><div class="stat-sub">students</div></div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Recent sessions</span></div>
+          <div class="card-body" id="recent-list"><div class="empty">No sessions yet</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Quick actions</span></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+            <button class="btn btn-primary" onclick="showView('mark')">Mark attendance now</button>
+            <button class="btn btn-outlined" onclick="showView('hist')">View attendance history</button>
+            <button class="btn btn-outlined" onclick="openMod('mcls')">Add new class</button>
+            <button class="btn btn-outlined" onclick="showView('setup')">Firebase setup guide</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MARK ATTENDANCE -->
+    <div id="view-mark" class="view">
+      <div class="view-title">Mark Attendance</div>
+      <div class="view-sub">Select class, set date, then mark each student</div>
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-body">
+          <div class="pill-input">
+            <div class="field" style="flex:1;margin:0;min-width:200px;">
+              <label>Class</label>
+              <select id="att-cls"></select>
+            </div>
+            <div class="field" style="min-width:160px;margin:0;">
+              <label>Date</label>
+              <input type="date" id="att-dt"/>
+            </div>
+            <button class="btn btn-primary" onclick="loadStudents()" style="margin-bottom:0;flex-shrink:0;">Load students</button>
+          </div>
+        </div>
+      </div>
+      <div id="att-area" style="display:none;">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title"><span id="att-cnt">0</span> students</span>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-outlined btn-sm" onclick="markAll('present')">All present</button>
+              <button class="btn btn-outlined btn-sm" onclick="markAll('absent')">All absent</button>
+            </div>
+          </div>
+          <div class="card-body" id="att-list"></div>
+          <div style="padding:12px 20px;border-top:1px solid var(--border);">
+            <button class="btn btn-success" style="width:100%;height:44px;font-size:15px;" onclick="submitAtt()">Submit attendance</button>
+          </div>
+        </div>
+      </div>
+      <div id="att-emp" class="empty" style="margin-top:40px;">Select a class and click "Load students"</div>
+    </div>
+
+    <!-- HISTORY -->
+    <div id="view-hist" class="view">
+      <div class="view-title">Attendance History</div>
+      <div class="view-sub">Pick a date to see sessions taken</div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-header">
+            <div class="cal-header" style="width:100%;margin:0;">
+              <button class="btn-icon" onclick="calPrev()">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+              </button>
+              <span class="cal-month-label" id="cal-lbl"></span>
+              <button class="btn-icon" onclick="calNext()">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="cal-grid">
+              <div class="cal-dh">Sun</div><div class="cal-dh">Mon</div><div class="cal-dh">Tue</div>
+              <div class="cal-dh">Wed</div><div class="cal-dh">Thu</div><div class="cal-dh">Fri</div><div class="cal-dh">Sat</div>
+              <div id="cal-days" style="display:contents;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Sessions — <span id="hist-dl" style="color:var(--primary);">select a date</span></span>
+            <button class="btn-icon" title="Reload" onclick="reloadHistDate()" id="hist-reload" style="display:none;">
+              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            </button>
+          </div>
+          <div class="card-body" id="hist-list"><div class="empty">Pick a date on the calendar</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLASSES -->
+    <div id="view-cls" class="view">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;">
+        <div><div class="view-title">Classes</div><div class="view-sub" style="margin:0;">Manage your assigned classes</div></div>
+        <button class="btn btn-primary" onclick="openMod('mcls')">Add class</button>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Class Name</th><th>Subject</th><th>Students</th><th>Teacher</th><th></th></tr></thead>
+            <tbody id="cls-tb"><tr><td colspan="5" class="empty">No classes yet</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div id="view-notif" class="view">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;">
+        <div><div class="view-title">Notifications</div><div class="view-sub" style="margin:0;">Inbox &amp; send messages</div></div>
+        <button class="btn-icon" title="Reload" onclick="loadNotifs()">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        </button>
+      </div>
+      <!-- Compose — shown for teacher/admin -->
+      <div id="compose-card" class="card" style="display:none;margin-bottom:20px;">
+        <div class="card-header"><span class="card-title">Compose message</span></div>
+        <div class="card-body">
+          <div class="field"><label>Title</label><input type="text" id="notif-title" placeholder="Subject line"/></div>
+          <div class="field"><label>Message</label><textarea id="notif-msg" style="width:100%;min-height:80px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;resize:vertical;outline:none;" placeholder="Write your message…"></textarea></div>
+          <div class="field"><label>To (leave blank to send to all students)</label><input type="text" id="notif-to" placeholder="Search student name…"/><div id="notif-match" style="font-size:12px;color:var(--primary);margin-top:4px;display:none;"></div></div>
+          <button class="btn btn-primary" onclick="sendNotif()">Send notification</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title" id="notif-section-lbl">Inbox</span></div>
+        <div class="card-body" id="notif-list"><div class="empty">Loading…</div></div>
+      </div>
+    </div>
+
+    <!-- CHANGE PASSWORD -->
+    <div id="view-pw" class="view">
+      <div style="max-width:480px;margin:0 auto;">
+        <div class="card">
+          <div class="card-body">
+            <div class="pw-hero">
+              <div class="pw-hero-icon">🔐</div>
+              <div class="pw-hero-title">Change Password</div>
+              <div class="pw-hero-sub">Re-enter your current password to verify your identity, then set a new one.</div>
+            </div>
+            <div class="divider"></div>
+            <div class="field"><label>Current Password</label><input type="password" id="pw-c" placeholder="Your current password"/></div>
+            <div class="field"><label>New Password</label><input type="password" id="pw-n" placeholder="At least 6 characters"/></div>
+            <div class="field"><label>Confirm New Password</label><input type="password" id="pw-f" placeholder="Repeat new password"/></div>
+            <button class="btn btn-primary btn-full" style="height:44px;font-size:15px;" onclick="changePw()">Update password</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FIREBASE SETUP -->
+    <div id="view-setup" class="view">
+      <div class="view-title">Firebase Setup Guide</div>
+      <div class="view-sub">Connect this website to your existing Firebase project — same database as your Android app</div>
+
+      <div class="info-banner">
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <span>This website uses the <strong>exact same Firebase project</strong> as your Android app — same Firestore database, same Auth users, same data. No migration needed.</span>
+      </div>
+
+      <div class="grid2" style="align-items:start;">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Step-by-step connection</span></div>
+          <div class="card-body">
+
+            <div class="setup-step">
+              <div class="step-num">1</div>
+              <div class="step-body">
+                <h4>Open your Firebase project</h4>
+                <p>Go to <strong>console.firebase.google.com</strong> and click on the same project you used for the Android app.</p>
+              </div>
+            </div>
+
+            <div class="setup-step">
+              <div class="step-num">2</div>
+              <div class="step-body">
+                <h4>Add a Web App (if not already done)</h4>
+                <p>Project Settings → Your apps → click the Web icon <code style="background:var(--surface3);padding:1px 6px;border-radius:4px;">&lt;/&gt;</code> → give it a nickname like "AttendEase Web" → Register app → copy the <code style="background:var(--surface3);padding:1px 6px;border-radius:4px;">firebaseConfig</code> object.</p>
+              </div>
+            </div>
+
+            <div class="setup-step">
+              <div class="step-num">3</div>
+              <div class="step-body">
+                <h4>Paste config into js/firebase-config.js</h4>
+                <p>Open the <code style="background:var(--surface3);padding:1px 6px;border-radius:4px;">js/firebase-config.js</code> file and replace the placeholder values:</p>
+                <div class="code-box">const firebaseConfig = {
+  apiKey:            "AIza...",
+  authDomain:        "your-app.firebaseapp.com",
+  projectId:         "your-app-id",
+  storageBucket:     "your-app.appspot.com",
+  messagingSenderId: "123456789",
+  appId:             "1:123...:web:abc"
+};</div>
+              </div>
+            </div>
+
+            <div class="setup-step">
+              <div class="step-num">4</div>
+              <div class="step-body">
+                <h4>Enable Email/Password Auth (already done for app)</h4>
+                <p>Firebase Console → Build → Authentication → Sign-in method → Email/Password should already be enabled. If not, enable it and save.</p>
+              </div>
+            </div>
+
+            <div class="setup-step">
+              <div class="step-num">5</div>
+              <div class="step-body">
+                <h4>Update Firestore Rules to allow web access</h4>
+                <p>Build → Firestore → Rules tab → make sure the rules allow authenticated users:</p>
+                <div class="code-box">rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}</div>
+                <p>Click Publish.</p>
+              </div>
+            </div>
+
+            <div class="setup-step">
+              <div class="step-num">6</div>
+              <div class="step-body">
+                <h4>Add your GitHub Pages domain to Auth</h4>
+                <p>Firebase Console → Authentication → Settings → Authorized domains → Add domain → paste your GitHub Pages URL:</p>
+                <div class="code-box">your-username.github.io</div>
+                <p>This allows sign-in from your hosted site.</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="card">
+            <div class="card-header"><span class="card-title">Deploy to GitHub Pages</span></div>
+            <div class="card-body">
+              <div class="setup-step">
+                <div class="step-num">1</div>
+                <div class="step-body"><h4>Create a GitHub repo</h4><p>Go to github.com → New repository → name it <code style="background:var(--surface3);padding:1px 6px;border-radius:4px;">attendease</code> → Public → Create.</p></div>
+              </div>
+              <div class="setup-step">
+                <div class="step-num">2</div>
+                <div class="step-body"><h4>Upload all files</h4><p>Drag and drop all the project files (index.html, css/, js/) into the repo. Commit directly to main.</p></div>
+              </div>
+              <div class="setup-step">
+                <div class="step-num">3</div>
+                <div class="step-body"><h4>Enable GitHub Pages</h4><p>Repo → Settings → Pages → Source: <strong>Deploy from a branch</strong> → Branch: <strong>main</strong> → folder: <strong>/ (root)</strong> → Save.</p></div>
+              </div>
+              <div class="setup-step" style="margin-bottom:0;">
+                <div class="step-num">4</div>
+                <div class="step-body"><h4>Your site is live!</h4><p>In 1–2 minutes your site is at:<br/><code style="background:var(--surface3);padding:2px 8px;border-radius:4px;">https://your-username.github.io/attendease</code></p></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-title">Firestore collections</span></div>
+            <div class="card-body" style="padding:0;">
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Collection</th><th>Key fields</th></tr></thead>
+                  <tbody>
+                    <tr><td><code style="background:var(--surface3);padding:1px 6px;border-radius:4px;">users</code></td><td style="color:var(--text2);font-size:12px;">uid, name, email, role, classIds[]</td></tr>
+                    <tr><td><code style="background:var(--surface3);padding:1px 6px;border-radius:4px;">classes</code></td><td style="color:var(--text2);font-size:12px;">classId, className, subject, teacherId</td></tr>
+                    <tr><td><code style="background:var(--surface3);padding:1px 6px;border-radius:4px;">attendance</code></td><td style="color:var(--text2);font-size:12px;">studentId, classId, date, sessionId, status</td></tr>
+                    <tr><td><code style="background:var(--surface3);padding:1px 6px;border-radius:4px;">sessions</code></td><td style="color:var(--text2);font-size:12px;">classId, date, startTime, endTime</td></tr>
+                    <tr><td><code style="background:var(--surface3);padding:1px 6px;border-radius:4px;">notifications</code></td><td style="color:var(--text2);font-size:12px;">targetUserId, title, message, timestamp</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /page-app -->
+
+<!-- ═══════ MODALS ═══════ -->
+<div class="modal-overlay" id="mcls" onclick="if(event.target===this)closeMod('mcls')">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">Add new class</span>
+      <button class="btn-icon" onclick="closeMod('mcls')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field"><label>Class Name</label><input id="nc-nm" placeholder="e.g. MAT BCS"/></div>
+      <div class="field"><label>Subject</label><input id="nc-sb" placeholder="e.g. Mathematics"/></div>
+      <div class="field"><label>Room (optional)</label><input id="nc-rm" placeholder="e.g. Room 101"/></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outlined" onclick="closeMod('mcls')">Cancel</button>
+      <button class="btn btn-primary" onclick="addCls()">Add class</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="msess" onclick="if(event.target===this)closeMod('msess')">
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-head">
+      <span class="modal-title" id="msess-t">Session</span>
+      <button class="btn-icon" onclick="closeMod('msess')">✕</button>
+    </div>
+    <div class="modal-body" id="msess-b"></div>
+    <div class="modal-foot">
+      <button class="btn btn-outlined" onclick="closeMod('msess')">Close</button>
+      <button class="btn btn-primary" onclick="saveEdits()">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import {
+  state, TODAY, DEMO,
+  login, register, logout, changePassword, onAuth,
+  loadClasses, addClass, deleteClass,
+  loadStudents, submitAttendance,
+  loadSessionsForDate, loadSessionRecords, saveSessionEdits,
+  loadNotifications, sendNotification,
+} from './js/app.js';
+
+// ── globals shared with onclick ────────────────────────────────
+const G = {
+  attStudents: [],   // current loaded students
+  attClassId: null,
+  editRecords: [],
+  allStudents: [],   // for notification name search
+  resolvedNotifUid: null,
+};
+window._G = G;
+
+// ── DATE ──────────────────────────────────────────────────────
+document.getElementById("topbar-date").textContent =
+  new Date().toLocaleDateString("en-IN", { weekday:"long", year:"numeric", month:"long", day:"numeric" });
+document.getElementById("att-dt").value = TODAY;
+
+// ── AUTO-LOGIN ────────────────────────────────────────────────
+onAuth(() => enterApp());
+
+// ── AUTH FUNCTIONS ────────────────────────────────────────────
+window.switchTab = (t) => {
+  document.getElementById("tab-li").classList.toggle("active", t==="li");
+  document.getElementById("tab-rg").classList.toggle("active", t==="rg");
+  document.getElementById("form-li").style.display = t==="li" ? "block" : "none";
+  document.getElementById("form-rg").style.display = t==="rg" ? "block" : "none";
+};
+
+window.doLogin = async () => {
+  const em = document.getElementById("li-em").value.trim();
+  const pw = document.getElementById("li-pw").value;
+  if (!em || !pw) { toast("Enter email and password", "err"); return; }
+  try { await login(em, pw); enterApp(); }
+  catch(e) { toast(e.message || "Login failed", "err"); }
+};
+
+window.doRegister = async () => {
+  const nm = document.getElementById("rg-nm").value.trim();
+  const em = document.getElementById("rg-em").value.trim();
+  const pw = document.getElementById("rg-pw").value;
+  const rl = document.getElementById("rg-rl").value;
+  if (!nm||!em||!pw) { toast("Fill all fields", "err"); return; }
+  if (pw.length < 6) { toast("Password: min 6 characters", "err"); return; }
+  try { await register(nm, em, pw, rl); enterApp(); toast("Account created!"); }
+  catch(e) { toast(e.message || "Registration failed", "err"); }
+};
+
+window.demoMode = async () => {
+  await login("demo@demo.com", "demo");
+  enterApp();
+  toast("Running in demo mode");
+};
+
+window.doLogout = async () => {
+  await logout();
+  showPage("page-login");
+};
+
+window.changePw = async () => {
+  const c = document.getElementById("pw-c").value;
+  const n = document.getElementById("pw-n").value;
+  const f = document.getElementById("pw-f").value;
+  if (!c) { toast("Enter current password", "err"); return; }
+  if (n.length < 6) { toast("New password: min 6 characters", "err"); return; }
+  if (n !== f) { toast("Passwords do not match", "err"); return; }
+  if (n === c) { toast("New password must differ", "err"); return; }
+  try {
+    await changePassword(c, n);
+    ["pw-c","pw-n","pw-f"].forEach(id => document.getElementById(id).value = "");
+    toast("Password updated successfully!");
+  } catch(e) {
+    if (e.code === "auth/wrong-password" || e.code === "auth/invalid-credential")
+      toast("Current password is incorrect", "err");
+    else toast(e.message || "Failed", "err");
+  }
+};
+
+// ── ENTER APP ─────────────────────────────────────────────────
+async function enterApp() {
+  showPage("page-app");
+  const nm = state.profile?.name || state.user?.email || "User";
+  const rl = state.profile?.role || "teacher";
+  document.getElementById("sb-av").textContent = nm.charAt(0).toUpperCase();
+  document.getElementById("sb-nm").textContent = nm;
+  document.getElementById("sb-rl").textContent = rl.charAt(0).toUpperCase() + rl.slice(1);
+
+  const isTeacher = rl === "teacher" || rl === "admin";
+  document.getElementById("compose-card").style.display = isTeacher ? "block" : "none";
+  document.getElementById("notif-section-lbl").textContent = isTeacher ? "Recently sent" : "Inbox";
+
+  await loadClasses();
+  renderClasses();
+  fillClassSelect();
+  renderCal();
+  loadDashboard();
+  loadNotifs();
+}
+
+// ── CLASSES ───────────────────────────────────────────────────
+function renderClasses() {
+  document.getElementById("s-cls").textContent = state.classes.length;
+  const tb = document.getElementById("cls-tb");
+  if (!state.classes.length) { tb.innerHTML = `<tr><td colspan="5" class="empty">No classes yet</td></tr>`; return; }
+  tb.innerHTML = state.classes.map(c => `
+    <tr>
+      <td><strong>${c.className}</strong></td>
+      <td>${c.subject}</td>
+      <td><span class="chip chip-blue">${c.studentCount||0} students</span></td>
+      <td style="color:var(--text2);">${c.teacherName||"—"}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="rmCls('${c.classId}')">Remove</button></td>
+    </tr>`).join("");
+}
+
+function fillClassSelect() {
+  const s = document.getElementById("att-cls");
+  s.innerHTML = `<option value="">— Select class —</option>` +
+    state.classes.map(c => `<option value="${c.classId}">${c.className} · ${c.subject}</option>`).join("");
+}
+
+window.addCls = async () => {
+  const nm = document.getElementById("nc-nm").value.trim();
+  const sb = document.getElementById("nc-sb").value.trim();
+  const rm = document.getElementById("nc-rm").value.trim();
+  if (!nm||!sb) { toast("Enter class name and subject", "err"); return; }
+  await addClass(nm, sb, rm);
+  renderClasses(); fillClassSelect();
+  closeMod("mcls");
+  ["nc-nm","nc-sb","nc-rm"].forEach(id => document.getElementById(id).value = "");
+  toast("Class added!");
+};
+
+window.rmCls = async (id) => {
+  if (!confirm("Delete this class?")) return;
+  await deleteClass(id);
+  renderClasses(); fillClassSelect();
+  toast("Class removed");
+};
+
+// ── MARK ATTENDANCE ───────────────────────────────────────────
+window.loadStudents = async () => {
+  const cid = document.getElementById("att-cls").value;
+  if (!cid) { toast("Select a class first", "err"); return; }
+  const students = await loadStudents(cid);
+  G.attStudents = students.map(s => ({ ...s, status:"present" }));
+  G.attClassId = cid;
+  document.getElementById("att-cnt").textContent = G.attStudents.length;
+  if (!G.attStudents.length) {
+    document.getElementById("att-area").style.display = "none";
+    document.getElementById("att-emp").textContent = "No students in this class yet.";
+    document.getElementById("att-emp").style.display = "block";
+    return;
+  }
+  document.getElementById("att-emp").style.display = "none";
+  document.getElementById("att-area").style.display = "block";
+  renderAttList();
+};
+
+function renderAttList() {
+  document.getElementById("att-list").innerHTML = G.attStudents.map((s,i) => `
+    <div class="att-row" id="ar-${i}">
+      <div class="att-av">${s.name.charAt(0).toUpperCase()}</div>
+      <div class="att-info">
+        <div class="att-name">${s.name}</div>
+        <div class="att-roll">${s.rollNo||s.email||""}</div>
+      </div>
+      <div class="att-btns">
+        <button class="att-btn p${s.status==="present"?" on":""}" onclick="setSt(${i},'present',this)">Present</button>
+        <button class="att-btn a${s.status==="absent"?" on":""}" onclick="setSt(${i},'absent',this)">Absent</button>
+        <button class="att-btn l${s.status==="late"?" on":""}" onclick="setSt(${i},'late',this)">Late</button>
+      </div>
+    </div>`).join("");
+}
+
+window.setSt = (i, status, btn) => {
+  G.attStudents[i].status = status;
+  const row = document.getElementById("ar-"+i);
+  row.querySelectorAll(".att-btn").forEach(b => b.classList.remove("on"));
+  btn.classList.add("on");
+};
+
+window.markAll = (status) => {
+  G.attStudents.forEach(s => s.status = status);
+  renderAttList();
+};
+
+window.submitAtt = async () => {
+  const date = document.getElementById("att-dt").value;
+  if (!G.attClassId || !date || !G.attStudents.length) { toast("Select class and load students first", "err"); return; }
+  await submitAttendance(G.attClassId, date, G.attStudents);
+  const p = G.attStudents.filter(s=>s.status==="present").length;
+  const a = G.attStudents.filter(s=>s.status==="absent").length;
+  const l = G.attStudents.filter(s=>s.status==="late").length;
+  toast(`Saved! ✓${p} present  ✗${a} absent  ⏰${l} late`);
+  loadDashboard();
+};
+
+// ── HISTORY ───────────────────────────────────────────────────
+window.loadHistDate = async (date) => {
+  state.selDate = date;
+  document.getElementById("hist-dl").textContent = date;
+  document.getElementById("hist-reload").style.display = "flex";
+  renderCal();
+  const sessions = await loadSessionsForDate(date);
+  const cont = document.getElementById("hist-list");
+  if (!sessions.length) { cont.innerHTML = `<div class="empty">No sessions on this date</div>`; return; }
+  cont.innerHTML = sessions.map(s => {
+    const r = s.records||[];
+    const p = r.filter(x=>x.status==="present").length;
+    const a = r.filter(x=>x.status==="absent").length;
+    const l = r.filter(x=>x.status==="late").length;
+    const t = s.startTime ? `${s.startTime}${s.endTime?" – "+s.endTime:""}` : "";
+    return `<div class="sess-card" onclick="openSess('${s.sessionId}')">
+      <div class="sess-top">
+        <span class="sess-name">${s.className} · ${s.subject||""}</span>
+        <button class="btn btn-outlined btn-sm" onclick="event.stopPropagation();openSess('${s.sessionId}')">View / Edit</button>
+      </div>
+      <div class="sess-meta">
+        ${t ? `<span>🕐 ${t}</span>` : ""}
+        <span style="color:#137333;">✓ ${p} present</span>
+        <span style="color:#c5221f;">✗ ${a} absent</span>
+        ${l ? `<span style="color:#b06000;">⏰ ${l} late</span>` : ""}
+      </div>
+    </div>`;
+  }).join("");
+};
+
+window.reloadHistDate = () => { if (state.selDate) window.loadHistDate(state.selDate); };
+
+window.openSess = async (sid) => {
+  const sess = (DEMO.history.find(s=>s.sessionId===sid)) ||
+               { sessionId:sid, records: await loadSessionRecords(sid) };
+  G.editRecords = (sess.records||[]).map(r => ({...r}));
+  document.getElementById("msess-t").textContent =
+    `${sess.className||""} · ${sess.subject||""} — ${sess.date||""}${sess.startTime?" at "+sess.startTime:""}`;
+  document.getElementById("msess-b").innerHTML = G.editRecords.length
+    ? G.editRecords.map((r,i) => `
+      <div class="att-row" id="ed-${i}">
+        <div class="att-av">${r.studentName.charAt(0).toUpperCase()}</div>
+        <div class="att-info"><div class="att-name">${r.studentName}</div></div>
+        <div class="att-btns">
+          <button class="att-btn p${r.status==="present"?" on":""}" onclick="edSt(${i},'present',this)">Present</button>
+          <button class="att-btn a${r.status==="absent"?" on":""}" onclick="edSt(${i},'absent',this)">Absent</button>
+          <button class="att-btn l${r.status==="late"?" on":""}" onclick="edSt(${i},'late',this)">Late</button>
+        </div>
+      </div>`).join("")
+    : `<div class="empty">No records for this session.</div>`;
+  openMod("msess");
+};
+
+window.edSt = (i, status, btn) => {
+  G.editRecords[i].status = status;
+  const row = document.getElementById("ed-"+i);
+  row.querySelectorAll(".att-btn").forEach(b => b.classList.remove("on"));
+  btn.classList.add("on");
+};
+
+window.saveEdits = async () => {
+  await saveSessionEdits(G.editRecords);
+  // update demo too
+  const sess = DEMO.history.find(s => s.records?.some(r => r.studentId === G.editRecords[0]?.studentId));
+  if (sess) sess.records = G.editRecords;
+  closeMod("msess");
+  toast("Changes saved!");
+  if (state.selDate) window.loadHistDate(state.selDate);
+};
+
+// ── CALENDAR ──────────────────────────────────────────────────
+window.calPrev = () => { state.calM--; if(state.calM<0){state.calM=11;state.calY--;} renderCal(); };
+window.calNext = () => { state.calM++; if(state.calM>11){state.calM=0;state.calY++;} renderCal(); };
+
+function renderCal() {
+  const MN = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  document.getElementById("cal-lbl").textContent = `${MN[state.calM]} ${state.calY}`;
+  const fd = new Date(state.calY, state.calM, 1).getDay();
+  const dm = new Date(state.calY, state.calM+1, 0).getDate();
+  const now = new Date();
+  const sd = new Set(DEMO.history.map(s=>s.date));
+  let h = "";
+  for(let i=0;i<fd;i++) h += `<div class="cal-d emp"></div>`;
+  for(let d=1;d<=dm;d++){
+    const ds = `${state.calY}-${String(state.calM+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const it = d===now.getDate()&&state.calM===now.getMonth()&&state.calY===now.getFullYear();
+    const is = ds===state.selDate;
+    const ih = sd.has(ds);
+    h += `<button class="cal-d${it?" today":""}${is?" sel":""}${ih?" has":""}" onclick="loadHistDate('${ds}')">${d}</button>`;
+  }
+  document.getElementById("cal-days").innerHTML = h;
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────
+function loadDashboard() {
+  const ts = DEMO.history.filter(s=>s.date===TODAY);
+  const ar = ts.flatMap(s=>s.records||[]);
+  document.getElementById("s-td").textContent = ts.length;
+  document.getElementById("s-pr").textContent = ar.filter(r=>r.status==="present").length;
+  document.getElementById("s-ab").textContent = ar.filter(r=>r.status==="absent").length;
+  const el = document.getElementById("recent-list");
+  if (!DEMO.history.length) { el.innerHTML = `<div class="empty">No sessions yet</div>`; return; }
+  el.innerHTML = DEMO.history.slice(0,5).map(s => {
+    const r = s.records||[];
+    const p = r.filter(x=>x.status==="present").length;
+    const a = r.filter(x=>x.status==="absent").length;
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--surface3);">
+      <div>
+        <div style="font-size:14px;font-weight:500;">${s.className} · ${s.subject||""}</div>
+        <div style="font-size:12px;color:var(--text3);">${s.date}${s.startTime?" · "+s.startTime:""}</div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <span class="chip chip-present">✓${p}</span>
+        <span class="chip chip-absent">✗${a}</span>
+      </div>
+    </div>`;
+  }).join("") + (DEMO.history.length>5 ? `<div style="padding:10px 0 0;text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('hist')">View all →</button></div>` : "");
+}
+
+// ── NOTIFICATIONS ─────────────────────────────────────────────
+window.loadNotifs = async () => {
+  const list = await loadNotifications();
+  const el = document.getElementById("notif-list");
+  if (!list.length) { el.innerHTML = `<div class="empty">No notifications yet</div>`; return; }
+  el.innerHTML = list.map(n => `
+    <div style="padding:14px 0;border-bottom:1px solid var(--surface3);">
+      <div style="font-size:14px;font-weight:500;margin-bottom:3px;">${n.title}</div>
+      <div style="font-size:13px;color:var(--text2);">${n.message}</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px;">${new Date(n.timestamp).toLocaleString("en-IN")}</div>
+    </div>`).join("") || `<div class="empty">No notifications yet</div>`;
+};
+
+window.sendNotif = async () => {
+  const title = document.getElementById("notif-title").value.trim();
+  const msg   = document.getElementById("notif-msg").value.trim();
+  if (!title||!msg) { toast("Fill title and message", "err"); return; }
+  await sendNotification(title, msg, G.resolvedNotifUid || "broadcast");
+  ["notif-title","notif-msg","notif-to"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById("notif-match").style.display = "none";
+  G.resolvedNotifUid = null;
+  toast("Notification sent!");
+  loadNotifs();
+};
+
+// Student name search for notifications
+document.getElementById("notif-to").addEventListener("input", (e) => {
+  const q = e.target.value.trim().toLowerCase();
+  G.resolvedNotifUid = null;
+  const matchEl = document.getElementById("notif-match");
+  if (!q) { matchEl.style.display="none"; return; }
+  const match = G.allStudents.find(s => s.name?.toLowerCase().includes(q));
+  if (match) {
+    G.resolvedNotifUid = match.uid;
+    matchEl.textContent = `✓ Matched: ${match.name}`;
+    matchEl.style.display = "block";
+  } else {
+    matchEl.textContent = "No match — will send to all";
+    matchEl.style.display = "block";
+  }
+});
+
+// ── UI HELPERS ────────────────────────────────────────────────
+function showPage(id) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+const TITLES = { dash:"Dashboard", mark:"Mark Attendance", hist:"Attendance History", cls:"Classes", notif:"Notifications", pw:"Change Password", setup:"Firebase Setup" };
+
+window.showView = (id) => {
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+  const v = document.getElementById("view-"+id); if(v) v.classList.add("active");
+  const n = document.getElementById("nav-"+id);  if(n) n.classList.add("active");
+  document.getElementById("topbar-title").textContent = TITLES[id] || "";
+};
+
+window.openMod  = (id) => document.getElementById(id).classList.add("open");
+window.closeMod = (id) => document.getElementById(id).classList.remove("open");
+
+window.toast = (msg, type="ok") => {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.className = `toast ${type} show`;
+  clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove("show"), 3500);
+};
+</script>
+</body>
+</html>
