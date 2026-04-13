@@ -4,605 +4,500 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>AttendEase</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Display:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <style>
-/* ─── RESET & VARIABLES ─────────────────────────────── */
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
-  --primary:#1a73e8;--primary-dk:#1557b0;--primary-lt:#e8f0fe;
-  --green:#137333;--green-lt:#e6f4ea;--green-bg:#34a853;
-  --red:#c5221f;--red-lt:#fce8e6;--red-bg:#ea4335;
-  --amber:#b06000;--amber-lt:#fef7e0;
-  --surface:#fff;--s2:#f8f9fa;--s3:#f1f3f4;
-  --border:#dadce0;--text:#202124;--t2:#5f6368;--t3:#80868b;
-  --radius:8px;--radius-lg:16px;--radius-xl:24px;
+  --blue:#1a73e8;--blue-dk:#1557b0;--blue-lt:#e8f0fe;--blue-md:#d2e3fc;
+  --green:#137333;--green-bg:#34a853;--green-lt:#e6f4ea;
+  --red:#c5221f;--red-bg:#ea4335;--red-lt:#fce8e6;
+  --amber:#b06000;--amber-bg:#f9ab00;--amber-lt:#fef7e0;
+  --surf:#fff;--s1:#f8f9fa;--s2:#f1f3f4;--s3:#e8eaed;
+  --bdr:#dadce0;--txt:#202124;--t2:#5f6368;--t3:#80868b;--t4:#bdc1c6;
+  --r8:8px;--r12:12px;--r16:16px;--r20:20px;--r24:24px;
   --sh1:0 1px 2px rgba(60,64,67,.3),0 1px 3px rgba(60,64,67,.15);
   --sh2:0 1px 3px rgba(60,64,67,.3),0 4px 8px rgba(60,64,67,.15);
   --sh3:0 2px 6px rgba(60,64,67,.3),0 6px 16px rgba(60,64,67,.15);
 }
-body{font-family:'Roboto',sans-serif;background:var(--s2);color:var(--text);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;}
-
-/* ─── PAGES ─────────────────────────────────────────── */
-.pg{display:none!important;}
-.pg.on{display:flex!important;flex-direction:column;min-height:100vh;}
+html,body{height:100%;font-family:'Roboto',sans-serif;background:var(--s1);color:var(--txt);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;}
+.pg{display:none!important;} .pg.on{display:flex!important;min-height:100vh;}
+#pg-login.on{align-items:center;justify-content:center;}
 #pg-app.on{flex-direction:row;}
 
-/* ─── LOGIN ─────────────────────────────────────────── */
-.lw{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;min-height:100vh;}
-.lc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:48px 40px;width:100%;max-width:400px;box-shadow:var(--sh2);}
-.ll{display:flex;align-items:center;gap:12px;margin-bottom:6px;}
-.li{width:40px;height:40px;background:var(--primary);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Google Sans',sans-serif;font-weight:700;font-size:20px;color:#fff;flex-shrink:0;}
-.lt{font-family:'Google Sans',sans-serif;font-size:22px;font-weight:700;color:var(--text);}
-.ls{font-size:13px;color:var(--t2);margin-bottom:28px;}
-.tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:24px;}
-.tab{flex:1;padding:10px 0;text-align:center;font-family:'Google Sans',sans-serif;font-size:14px;font-weight:500;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all.15s;user-select:none;}
-.tab.on{color:var(--primary);border-bottom-color:var(--primary);}
+/* LOGIN */
+.lw{width:100%;display:flex;align-items:center;justify-content:center;padding:32px 16px;min-height:100vh;}
+.lc{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r24);padding:52px 44px 44px;width:100%;max-width:420px;box-shadow:var(--sh2);}
+.lb{display:flex;align-items:center;gap:14px;margin-bottom:8px;}
+.li{width:44px;height:44px;background:var(--blue);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Google Sans Display',sans-serif;font-weight:700;font-size:22px;color:#fff;flex-shrink:0;}
+.ln{font-family:'Google Sans Display',sans-serif;font-size:24px;font-weight:700;color:var(--txt);}
+.ls{font-size:13px;color:var(--t2);margin-bottom:32px;padding-left:58px;}
+.tabs{display:flex;border-bottom:2px solid var(--bdr);margin-bottom:28px;}
+.tab{flex:1;padding:11px 0;text-align:center;font-family:'Google Sans',sans-serif;font-size:14px;font-weight:500;color:var(--t2);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all.2s;user-select:none;}
+.tab.on{color:var(--blue);border-bottom-color:var(--blue);}
 
-/* ─── FORM FIELDS ───────────────────────────────────── */
-.fg{margin-bottom:18px;}
-.fl{display:block;font-size:12px;font-weight:500;color:var(--t2);margin-bottom:5px;letter-spacing:.3px;}
-.fi{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius);font-size:14px;font-family:'Roboto',sans-serif;color:var(--text);background:var(--surface);outline:none;transition:border-color.15s,box-shadow.15s;}
-.fi:focus{border-color:var(--primary);box-shadow:0 0 0 2px rgba(26,115,232,.15);}
-.fi option{background:var(--surface);}
-textarea.fi{resize:vertical;min-height:80px;padding:10px 14px;}
+/* FORM */
+.fg{margin-bottom:20px;}
+.fg label{display:block;font-size:12px;font-weight:500;color:var(--t2);margin-bottom:6px;letter-spacing:.3px;}
+.fi{width:100%;padding:11px 14px;border:1.5px solid var(--bdr);border-radius:var(--r8);font-size:14px;font-family:'Roboto',sans-serif;color:var(--txt);background:var(--surf);outline:none;transition:border-color.15s,box-shadow.15s;}
+.fi:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,115,232,.12);}
+.fi option{background:var(--surf);}
+textarea.fi{resize:vertical;min-height:80px;}
 
-/* ─── BUTTONS ───────────────────────────────────────── */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0 24px;height:40px;border-radius:20px;font-size:14px;font-family:'Google Sans',sans-serif;font-weight:500;cursor:pointer;border:none;transition:all.15s;white-space:nowrap;text-decoration:none;}
-.btn:active{transform:scale(.98);}
-.btn:disabled{opacity:.6;cursor:default;pointer-events:none;}
-.bp{background:var(--primary);color:#fff;}.bp:hover{background:var(--primary-dk);box-shadow:var(--sh2);}
-.bo{background:transparent;color:var(--primary);border:1px solid var(--border);}.bo:hover{background:var(--primary-lt);border-color:var(--primary);}
-.bt{background:transparent;color:var(--primary);padding:0 12px;}.bt:hover{background:var(--primary-lt);}
-.bg2{background:var(--green-bg);color:#fff;}.bg2:hover{background:#2d9248;}
-.brd{background:var(--red-lt);color:var(--red);border:1px solid #f5b8b5;}.brd:hover{background:#f8d7d5;}
-.bw{width:100%;border-radius:var(--radius);}
-.bsm{height:32px;padding:0 16px;font-size:12px;}
-.bic{width:36px;height:36px;padding:0;border-radius:50%;background:transparent;color:var(--t2);font-size:18px;cursor:pointer;border:none;display:inline-flex;align-items:center;justify-content:center;transition:background.15s;flex-shrink:0;}
-.bic:hover{background:var(--s3);}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0 28px;height:42px;border-radius:21px;font-size:14px;font-family:'Google Sans',sans-serif;font-weight:500;cursor:pointer;border:none;transition:all.15s;white-space:nowrap;letter-spacing:.2px;}
+.btn:active{transform:scale(.97);}
+.btn:disabled{opacity:.5;cursor:not-allowed;pointer-events:none;}
+.bp{background:var(--blue);color:#fff;} .bp:hover{background:var(--blue-dk);box-shadow:var(--sh2);}
+.bo{background:transparent;color:var(--blue);border:1.5px solid var(--bdr);} .bo:hover{background:var(--blue-lt);border-color:var(--blue-md);}
+.bt{background:transparent;color:var(--blue);padding:0 14px;} .bt:hover{background:var(--blue-lt);}
+.bg{background:var(--green-bg);color:#fff;} .bg:hover{background:var(--green);box-shadow:var(--sh2);}
+.brd{background:var(--red-lt);color:var(--red);border:1.5px solid #f5c6c5;} .brd:hover{background:#f8d7d5;}
+.bw{width:100%;border-radius:var(--r8);height:46px;font-size:15px;}
+.bsm{height:34px;padding:0 18px;font-size:13px;border-radius:17px;}
+.bxs{height:28px;padding:0 12px;font-size:12px;border-radius:14px;}
+.bic{width:40px;height:40px;padding:0;border-radius:50%;background:transparent;border:none;color:var(--t2);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:background.12s;flex-shrink:0;}
+.bic:hover{background:var(--s2);}
 
-/* ─── SIDEBAR ───────────────────────────────────────── */
-.sb{width:256px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto;}
-.sbh{display:flex;align-items:center;gap:10px;padding:18px 18px 10px;}
-.sbi{width:32px;height:32px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Google Sans',sans-serif;font-weight:700;font-size:16px;color:#fff;flex-shrink:0;}
-.sbt{font-family:'Google Sans',sans-serif;font-size:17px;font-weight:600;color:var(--text);}
-.sbs{font-size:11px;font-weight:500;color:var(--t3);letter-spacing:.8px;text-transform:uppercase;padding:14px 18px 4px;}
-.ni{display:flex;align-items:center;gap:12px;padding:9px 16px;margin:1px 8px;border-radius:var(--radius-lg);cursor:pointer;font-family:'Google Sans',sans-serif;font-size:14px;font-weight:500;color:var(--t2);transition:all.12s;border:none;background:transparent;width:calc(100% - 16px);text-align:left;}
-.ni:hover{background:var(--s3);color:var(--text);}
-.ni.on{background:var(--primary-lt);color:var(--primary);}
-.nic{width:20px;height:20px;flex-shrink:0;}
-.sbb{margin-top:auto;padding:12px;border-top:1px solid var(--border);}
-.ur{display:flex;align-items:center;gap:10px;padding:10px;border-radius:var(--radius-lg);cursor:pointer;transition:background.12s;margin-bottom:8px;}
-.ur:hover{background:var(--s3);}
-.uav{width:36px;height:36px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Google Sans',sans-serif;font-weight:700;font-size:14px;flex-shrink:0;}
+/* SIDEBAR */
+.sb{width:260px;height:100vh;background:var(--surf);border-right:1px solid var(--bdr);display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;overflow-y:auto;}
+.sbr{display:flex;align-items:center;gap:12px;padding:20px 18px 12px;}
+.sbi{width:36px;height:36px;background:var(--blue);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Google Sans Display',sans-serif;font-weight:700;font-size:17px;color:#fff;flex-shrink:0;}
+.sbn{font-family:'Google Sans',sans-serif;font-size:18px;font-weight:600;}
+.sbs{font-size:11px;font-weight:500;color:var(--t3);letter-spacing:.9px;text-transform:uppercase;padding:16px 20px 4px;}
+.ni{display:flex;align-items:center;gap:13px;padding:10px 14px;margin:1px 8px;border-radius:var(--r16);cursor:pointer;font-family:'Google Sans',sans-serif;font-size:14px;font-weight:500;color:var(--t2);transition:all.12s;border:none;background:transparent;width:calc(100% - 16px);text-align:left;}
+.ni:hover{background:var(--s2);color:var(--txt);}
+.ni.on{background:var(--blue-lt);color:var(--blue);}
+.ni svg{width:20px;height:20px;flex-shrink:0;}
+.sbb{margin-top:auto;padding:12px;border-top:1px solid var(--bdr);}
+.uc{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:var(--r16);cursor:pointer;transition:background.12s;margin-bottom:8px;}
+.uc:hover{background:var(--s2);}
+.uav{width:38px;height:38px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Google Sans',sans-serif;font-weight:700;font-size:15px;flex-shrink:0;}
 
-/* ─── MAIN CONTENT ──────────────────────────────────── */
-.mn{flex:1;min-width:0;overflow-y:auto;}
-.tb{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:64px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;}
+/* MAIN */
+.mn{flex:1;min-width:0;display:flex;flex-direction:column;}
+.tb{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:64px;background:var(--surf);border-bottom:1px solid var(--bdr);flex-shrink:0;position:sticky;top:0;z-index:20;}
 .tbt{font-family:'Google Sans',sans-serif;font-size:20px;font-weight:500;}
-
-/* ─── VIEWS ─────────────────────────────────────────── */
-.vw{display:none;padding:24px;}
+.pc{flex:1;overflow-y:auto;}
+.vw{display:none;padding:28px;}
 .vw.on{display:block;}
-.vt{font-family:'Google Sans',sans-serif;font-size:22px;font-weight:500;margin-bottom:4px;}
-.vs{font-size:14px;color:var(--t2);margin-bottom:22px;}
-@keyframes fu{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
-.vw.on>*{animation:fu .2s ease both;}
+@keyframes fu{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.vw.on>*{animation:fu .18s ease both;}
 .vw.on>*:nth-child(2){animation-delay:.04s;}
 .vw.on>*:nth-child(3){animation-delay:.08s;}
 .vw.on>*:nth-child(4){animation-delay:.12s;}
 
-/* ─── STATS ─────────────────────────────────────────── */
-.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px;}
-.sc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 22px;box-shadow:var(--sh1);}
-.sl{font-size:11px;font-weight:500;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
-.sv{font-family:'Google Sans',sans-serif;font-size:30px;font-weight:700;}
-.ssub{font-size:12px;color:var(--t3);margin-top:2px;}
-.sc.blue .sv{color:var(--primary);}
-.sc.grn .sv{color:var(--green-bg);}
-.sc.red .sv{color:var(--red-bg);}
-.sc.amb .sv{color:#f9ab00;}
+/* PAGE HEADER */
+.ph{margin-bottom:22px;}
+.ph h2{font-family:'Google Sans',sans-serif;font-size:22px;font-weight:500;margin-bottom:3px;}
+.ph p{font-size:14px;color:var(--t2);}
+.phr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;}
+.phr .ph{margin-bottom:0;}
 
-/* ─── CARD ──────────────────────────────────────────── */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--sh1);}
-.ch{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);}
+/* STATS */
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.sc{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r16);padding:22px 24px;box-shadow:var(--sh1);transition:box-shadow.2s;}
+.sc:hover{box-shadow:var(--sh2);}
+.sl{font-size:11px;font-weight:500;color:var(--t2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;}
+.sv{font-family:'Google Sans Display',sans-serif;font-size:36px;font-weight:700;line-height:1;}
+.ss{font-size:12px;color:var(--t3);margin-top:6px;}
+.sc.blue .sv{color:var(--blue);} .sc.grn .sv{color:var(--green-bg);} .sc.red .sv{color:var(--red-bg);} .sc.amb .sv{color:var(--amber-bg);}
+
+/* CARDS */
+.card{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r16);box-shadow:var(--sh1);overflow:hidden;}
+.ch{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--s2);}
 .ct{font-family:'Google Sans',sans-serif;font-size:15px;font-weight:500;}
-.cb{padding:16px 18px;}
+.cb{padding:8px 20px 20px;}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
 
-/* ─── TABLE ─────────────────────────────────────────── */
+/* TABLE */
 .tw{overflow-x:auto;}
-table{width:100%;border-collapse:collapse;font-size:14px;}
-thead tr{border-bottom:2px solid var(--border);}
-th{text-align:left;padding:11px 16px;font-family:'Google Sans',sans-serif;font-size:11px;font-weight:500;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
-td{padding:12px 16px;border-bottom:1px solid var(--s3);vertical-align:middle;}
-tbody tr:hover td{background:var(--s2);}
+table{width:100%;border-collapse:collapse;}
+thead tr{border-bottom:2px solid var(--bdr);}
+th{text-align:left;padding:12px 16px;font-family:'Google Sans',sans-serif;font-size:11px;font-weight:500;color:var(--t2);text-transform:uppercase;letter-spacing:.6px;white-space:nowrap;}
+td{padding:13px 16px;border-bottom:1px solid var(--s1);vertical-align:middle;}
 tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:var(--s1);}
 
-/* ─── CHIPS ─────────────────────────────────────────── */
+/* CHIPS */
 .chip{display:inline-flex;align-items:center;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:500;}
-.cp{background:var(--green-lt);color:var(--green);}
-.ca{background:var(--red-lt);color:var(--red);}
-.cl{background:var(--amber-lt);color:var(--amber);}
-.cb2{background:var(--primary-lt);color:var(--primary);}
-.cg{background:var(--s3);color:var(--t2);}
+.cb2{background:var(--blue-lt);color:var(--blue);}
+.cg2{background:var(--green-lt);color:var(--green);}
+.cr{background:var(--red-lt);color:var(--red);}
+.cam{background:var(--amber-lt);color:var(--amber);}
+.cgr{background:var(--s2);color:var(--t2);}
 
-/* ─── STUDENT ROWS (mark attendance) ───────────────── */
-.sr{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--s3);}
-.sr:last-child{border-bottom:none;}
-.sav{width:38px;height:38px;border-radius:50%;background:var(--primary-lt);color:var(--primary);display:flex;align-items:center;justify-content:center;font-family:'Google Sans',sans-serif;font-weight:700;font-size:14px;flex-shrink:0;}
-.si{flex:1;min-width:0;}
-.sn{font-size:14px;font-weight:500;}
-.sk{font-size:11px;color:var(--t3);}
-.stbs{display:flex;gap:5px;}
-.stb{padding:5px 13px;border-radius:14px;font-size:12px;font-family:'Google Sans',sans-serif;font-weight:500;cursor:pointer;border:1px solid transparent;transition:all.1s;}
-.stb.p{background:var(--green-lt);border-color:#a8d5b5;color:var(--green);}
-.stb.p.on{background:var(--green);color:#fff;border-color:var(--green);}
+/* STUDENT ROWS */
+.srow{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid var(--s1);}
+.srow:last-child{border-bottom:none;}
+.sav{width:40px;height:40px;border-radius:50%;background:var(--blue-lt);color:var(--blue);display:flex;align-items:center;justify-content:center;font-family:'Google Sans',sans-serif;font-weight:700;font-size:15px;flex-shrink:0;}
+.snm{font-size:14px;font-weight:500;}
+.srl{font-size:12px;color:var(--t3);}
+.stbs{display:flex;gap:6px;}
+.stb{padding:6px 14px;border-radius:16px;font-size:12px;font-family:'Google Sans',sans-serif;font-weight:500;cursor:pointer;border:1.5px solid transparent;transition:all.12s;}
+.stb.p{background:var(--green-lt);border-color:#b7dfbf;color:var(--green);}
+.stb.p.on{background:var(--green-bg);border-color:var(--green-bg);color:#fff;}
 .stb.a{background:var(--red-lt);border-color:#f5b8b5;color:var(--red);}
-.stb.a.on{background:var(--red);color:#fff;border-color:var(--red);}
-.stb.l{background:var(--amber-lt);border-color:#f8d975;color:var(--amber);}
-.stb.l.on{background:var(--amber);color:#fff;border-color:var(--amber);}
+.stb.a.on{background:var(--red-bg);border-color:var(--red-bg);color:#fff;}
+.stb.l{background:var(--amber-lt);border-color:#f5dc7f;color:var(--amber);}
+.stb.l.on{background:var(--amber-bg);border-color:var(--amber-bg);color:#fff;}
 
-/* ─── CALENDAR ──────────────────────────────────────── */
-.cng{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
-.cdh{text-align:center;font-size:11px;font-weight:500;color:var(--t2);padding:5px 0;}
-.cd{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:13px;cursor:pointer;position:relative;border:none;background:transparent;color:var(--text);transition:background.1s;}
-.cd:hover:not(.emp){background:var(--s3);}
-.cd.today{background:var(--primary-lt);color:var(--primary);font-weight:700;}
-.cd.sel{background:var(--primary);color:#fff;font-weight:700;}
+/* CALENDAR */
+.cg{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.cdh{text-align:center;font-size:11px;font-weight:500;color:var(--t2);padding:5px 0 8px;}
+.cd{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:13px;cursor:pointer;position:relative;border:none;background:transparent;color:var(--txt);transition:background.12s,color.12s;}
+.cd:hover:not(.emp){background:var(--s2);}
+.cd.today{background:var(--blue-lt);color:var(--blue);font-weight:700;}
+.cd.sel{background:var(--blue);color:#fff;font-weight:700;}
 .cd.has::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--green-bg);}
 .cd.sel.has::after{background:#fff;}
-.cd.emp{cursor:default;}
+.cd.emp{cursor:default;color:var(--t4);}
 
-/* ─── SESSION CARDS ─────────────────────────────────── */
-.sessc{padding:12px 0;border-bottom:1px solid var(--s3);cursor:pointer;transition:padding-left.1s;}
-.sessc:last-child{border-bottom:none;}
-.sessc:hover{padding-left:6px;}
-.sesst{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
-.sessn{font-family:'Google Sans',sans-serif;font-size:15px;font-weight:500;}
-.sessm{display:flex;gap:12px;font-size:12px;color:var(--t2);flex-wrap:wrap;}
+/* SESSION ITEMS */
+.sitem{padding:14px 0;border-bottom:1px solid var(--s1);cursor:pointer;}
+.sitem:last-child{border-bottom:none;}
+.sitem:hover .sname{color:var(--blue);}
+.stop{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;}
+.sname{font-family:'Google Sans',sans-serif;font-size:15px;font-weight:500;transition:color.12s;}
+.smeta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
 
-/* ─── MODAL ─────────────────────────────────────────── */
-.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;padding:20px;}
+/* MODAL */
+.ov{display:none;position:fixed;inset:0;background:rgba(32,33,36,.55);z-index:100;align-items:center;justify-content:center;padding:24px;}
 .ov.on{display:flex;}
-.mo{background:var(--surface);border-radius:var(--radius-xl);width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:var(--sh3);}
-.mh{padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-.mt{font-family:'Google Sans',sans-serif;font-size:17px;font-weight:500;}
-.mb{padding:18px 22px;}
-.mf{padding:10px 14px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;}
+.mo{background:var(--surf);border-radius:var(--r24);width:100%;max-width:540px;max-height:90vh;overflow-y:auto;box-shadow:var(--sh3);}
+.mh{padding:22px 26px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bdr);}
+.mtl{font-family:'Google Sans',sans-serif;font-size:18px;font-weight:500;}
+.mb{padding:20px 26px;}
+.mf{padding:12px 18px;border-top:1px solid var(--bdr);display:flex;justify-content:flex-end;gap:10px;}
 
-/* ─── SETUP STEPS ───────────────────────────────────── */
-.stp{display:flex;gap:14px;margin-bottom:22px;}
-.spn{width:30px;height:30px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Google Sans',sans-serif;font-weight:700;font-size:13px;flex-shrink:0;margin-top:2px;}
-.spb h4{font-family:'Google Sans',sans-serif;font-size:14px;font-weight:500;margin-bottom:4px;}
-.spb p{font-size:13px;color:var(--t2);line-height:1.6;}
-.codebox{background:#f8f9fa;border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;font-family:monospace;font-size:12px;color:#c62828;white-space:pre;overflow-x:auto;margin:8px 0;line-height:1.6;}
-.infobanner{background:#e8f0fe;border:1px solid #aecbfa;border-radius:var(--radius);padding:12px 14px;font-size:13px;color:var(--primary);margin-bottom:20px;display:flex;gap:10px;align-items:flex-start;line-height:1.5;}
+/* SETUP */
+.stp{display:flex;gap:16px;margin-bottom:24px;}
+.spn{width:32px;height:32px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Google Sans',sans-serif;font-weight:700;font-size:13px;flex-shrink:0;margin-top:1px;}
+.spb h4{font-family:'Google Sans',sans-serif;font-size:14px;font-weight:500;margin-bottom:5px;}
+.spb p{font-size:13px;color:var(--t2);line-height:1.65;}
+.codebox{background:#f8f9fa;border:1px solid var(--bdr);border-radius:var(--r8);padding:12px 16px;font-family:monospace;font-size:12px;color:#c5221f;white-space:pre;overflow-x:auto;margin:8px 0;line-height:1.7;}
+code{background:var(--s2);padding:1px 6px;border-radius:4px;font-family:monospace;font-size:12px;}
+.infob{background:var(--blue-lt);border:1px solid var(--blue-md);border-radius:var(--r8);padding:14px 16px;font-size:13px;color:var(--blue);display:flex;gap:10px;align-items:flex-start;line-height:1.6;}
 
-/* ─── PASSWORD PAGE ─────────────────────────────────── */
-.pwhero{text-align:center;padding:22px 0 14px;}
-.pwico{font-size:46px;margin-bottom:10px;}
-.pwtit{font-family:'Google Sans',sans-serif;font-size:20px;font-weight:500;margin-bottom:6px;}
-.pwsub{font-size:13px;color:var(--t2);}
-.divider{height:1px;background:var(--border);margin:16px 0;}
+/* MISC */
+.divider{height:1px;background:var(--bdr);margin:18px 0;}
+.empty{text-align:center;padding:40px 20px;color:var(--t3);font-size:14px;}
+.loading{text-align:center;padding:24px;color:var(--t2);font-size:13px;}
+.rrow{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--s1);}
+.rrow:last-child{border-bottom:none;}
+.pw-hero{text-align:center;padding:28px 0 14px;}
 
-/* ─── NOTIFICATIONS ─────────────────────────────────── */
-.nrow{padding:13px 0;border-bottom:1px solid var(--s3);}
-.nrow:last-child{border-bottom:none;}
-.ntit{font-size:14px;font-weight:500;margin-bottom:3px;}
-.nmsg{font-size:13px;color:var(--t2);}
-.nts{font-size:11px;color:var(--t3);margin-top:3px;}
+/* TOAST */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(64px);background:#202124;color:#fff;padding:13px 26px;border-radius:28px;font-size:14px;z-index:999;opacity:0;transition:all.28s cubic-bezier(.2,.8,.3,1);pointer-events:none;box-shadow:var(--sh3);white-space:nowrap;max-width:90vw;}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.ok{background:var(--green);} .toast.err{background:var(--red-bg);}
 
-/* ─── TOAST ─────────────────────────────────────────── */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--text);color:#fff;padding:12px 24px;border-radius:24px;font-size:14px;z-index:999;opacity:0;transition:all.3s;pointer-events:none;box-shadow:var(--sh3);white-space:nowrap;}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-.toast.ok{background:var(--green);}
-.toast.err{background:var(--red-bg);}
-
-/* ─── MISC ──────────────────────────────────────────── */
-.empty{text-align:center;padding:36px 20px;color:var(--t3);font-size:14px;}
-.loading{text-align:center;padding:20px;color:var(--t2);font-size:14px;}
-strong{font-weight:500;}
-code{background:var(--s3);padding:1px 6px;border-radius:4px;font-family:monospace;}
-
-/* ─── RESPONSIVE ────────────────────────────────────── */
-@media(max-width:900px){.sg{grid-template-columns:1fr 1fr;}.g2{grid-template-columns:1fr;}}
-@media(max-width:640px){.sb{display:none;}.vw{padding:16px;}.sg{grid-template-columns:1fr 1fr;}}
+/* RESPONSIVE */
+@media(max-width:1024px){.sg{grid-template-columns:1fr 1fr;}}
+@media(max-width:768px){.sb{display:none;}.vw{padding:16px;}.sg{grid-template-columns:1fr 1fr;}.g2{grid-template-columns:1fr;}}
+@media(max-width:500px){.sg{grid-template-columns:1fr 1fr;}.stbs{flex-wrap:wrap;}}
 </style>
-<!-- Firebase Compat SDK — synchronous load, no ES modules, no race conditions -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
-<!-- ═══════════════════════════ LOGIN ═══════════════════════════ -->
+<!-- LOGIN -->
 <div id="pg-login" class="pg on">
   <div class="lw">
     <div class="lc">
-      <div class="ll">
-        <div class="li">A</div>
-        <span class="lt">AttendEase</span>
-      </div>
+      <div class="lb"><div class="li">A</div><span class="ln">AttendEase</span></div>
       <p class="ls">Attendance management system</p>
-
       <div class="tabs">
         <div class="tab on" id="tab-li" onclick="switchTab('li')">Sign in</div>
         <div class="tab" id="tab-rg" onclick="switchTab('rg')">Create account</div>
       </div>
-
-      <!-- SIGN IN -->
       <div id="form-li">
-        <div class="fg">
-          <label class="fl">Email</label>
-          <input class="fi" type="email" id="li-em" placeholder="you@iiitm.ac.in"/>
-        </div>
-        <div class="fg">
-          <label class="fl">Password</label>
-          <input class="fi" type="password" id="li-pw" placeholder="••••••••"/>
-        </div>
-        <button class="btn bp bw" style="height:44px;font-size:15px;margin-bottom:14px;" onclick="doLogin()">Sign in</button>
-        <div style="text-align:center;">
-          <span style="font-size:13px;color:var(--t2);">No Firebase yet? </span>
-          <button class="btn bt" style="font-size:13px;height:auto;padding:0;" onclick="demoMode()">Try demo mode →</button>
-        </div>
+        <div class="fg"><label>Email address</label><input class="fi" type="email" id="li-em" placeholder="you@iiitm.ac.in" autocomplete="email"/></div>
+        <div class="fg"><label>Password</label><input class="fi" type="password" id="li-pw" placeholder="Enter password" autocomplete="current-password"/></div>
+        <button class="btn bp bw" id="li-btn" onclick="doLogin()">Sign in</button>
+        <p style="text-align:center;margin-top:14px;font-size:13px;color:var(--t2);">No Firebase? <button class="btn bt" style="height:auto;padding:2px 8px;font-size:13px;" onclick="demoMode()">Try demo →</button></p>
       </div>
-
-      <!-- REGISTER -->
       <div id="form-rg" style="display:none;">
-        <div class="fg"><label class="fl">Full Name</label><input class="fi" type="text" id="rg-nm" placeholder="Your full name"/></div>
-        <div class="fg"><label class="fl">Email</label><input class="fi" type="email" id="rg-em" placeholder="you@iiitm.ac.in"/></div>
-        <div class="fg"><label class="fl">Password</label><input class="fi" type="password" id="rg-pw" placeholder="Minimum 6 characters"/></div>
-        <div class="fg">
-          <label class="fl">Role</label>
+        <div class="fg"><label>Full name</label><input class="fi" type="text" id="rg-nm" placeholder="Your full name"/></div>
+        <div class="fg"><label>Email address</label><input class="fi" type="email" id="rg-em" placeholder="you@iiitm.ac.in"/></div>
+        <div class="fg"><label>Password</label><input class="fi" type="password" id="rg-pw" placeholder="Minimum 6 characters"/></div>
+        <div class="fg"><label>Role</label>
           <select class="fi" id="rg-rl">
             <option value="teacher">Teacher</option>
             <option value="admin">Admin</option>
             <option value="student">Student</option>
           </select>
         </div>
-        <button class="btn bp bw" style="height:44px;font-size:15px;" onclick="doRegister()">Create account</button>
+        <button class="btn bp bw" id="rg-btn" onclick="doRegister()">Create account</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════ APP ═══════════════════════════ -->
+<!-- APP -->
 <div id="pg-app" class="pg">
-
-  <!-- SIDEBAR -->
   <nav class="sb">
-    <div class="sbh">
-      <div class="sbi">A</div>
-      <span class="sbt">AttendEase</span>
-    </div>
-
+    <div class="sbr"><div class="sbi">A</div><span class="sbn">AttendEase</span></div>
     <div class="sbs">Main</div>
-    <button class="ni on" id="ni-dash" onclick="showView('dash')">
-      <svg class="nic" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-      Dashboard
-    </button>
-    <button class="ni" id="ni-mark" onclick="showView('mark')">
-      <svg class="nic" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-      Mark Attendance
-    </button>
-    <button class="ni" id="ni-hist" onclick="showView('hist')">
-      <svg class="nic" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-      Attendance History
-    </button>
-    <button class="ni" id="ni-cls" onclick="showView('cls')">
-      <svg class="nic" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
-      Classes
-    </button>
-    <button class="ni" id="ni-notif" onclick="showView('notif')">
-      <svg class="nic" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-      Notifications
-    </button>
-
+    <button class="ni on" id="ni-dash" onclick="gv('dash')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Dashboard</button>
+    <button class="ni" id="ni-mark" onclick="gv('mark')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Mark Attendance</button>
+    <button class="ni" id="ni-hist" onclick="gv('hist')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>Attendance History</button>
+    <button class="ni" id="ni-cls" onclick="gv('cls')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>Classes</button>
+    <button class="ni" id="ni-notif" onclick="gv('notif')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>Notifications</button>
     <div class="sbs">Account</div>
-    <button class="ni" id="ni-pw" onclick="showView('pw')">
-      <svg class="nic" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-      Change Password
-    </button>
-    <button class="ni" id="ni-setup" onclick="showView('setup')">
-      <svg class="nic" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-      Firebase Setup
-    </button>
-
+    <button class="ni" id="ni-pw" onclick="gv('pw')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>Change Password</button>
+    <button class="ni" id="ni-setup" onclick="gv('setup')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Firebase Setup</button>
     <div class="sbb">
-      <div class="ur" onclick="showView('pw')">
+      <div class="uc" onclick="gv('pw')">
         <div class="uav" id="sb-av">?</div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="sb-nm">—</div>
-          <div style="font-size:11px;color:var(--t3);" id="sb-rl">—</div>
-        </div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="sb-nm">—</div><div style="font-size:12px;color:var(--t3);" id="sb-rl">—</div></div>
       </div>
-      <button class="btn bo bw bsm" style="border-radius:8px;" onclick="doLogout()">Sign out</button>
+      <button class="btn bo bw bsm" style="border-radius:var(--r8);height:38px;" onclick="doLogout()">Sign out</button>
     </div>
   </nav>
 
-  <!-- MAIN -->
   <div class="mn">
     <div class="tb">
-      <span class="tbt" id="tb-title">Dashboard</span>
-      <span style="font-size:13px;color:var(--t2);" id="tb-date"></span>
+      <span class="tbt" id="tb-ttl">Dashboard</span>
+      <span style="font-size:13px;color:var(--t2);" id="tb-dt"></span>
     </div>
+    <div class="pc">
 
-    <!-- ── DASHBOARD ── -->
-    <div id="vw-dash" class="vw on">
-      <div class="sg">
-        <div class="sc blue"><div class="sl">My Classes</div><div class="sv" id="s-cls">—</div><div class="ssub">assigned</div></div>
-        <div class="sc amb"><div class="sl">Sessions Today</div><div class="sv" id="s-td">—</div><div class="ssub">taken today</div></div>
-        <div class="sc grn"><div class="sl">Present Today</div><div class="sv" id="s-pr">—</div><div class="ssub">students</div></div>
-        <div class="sc red"><div class="sl">Absent Today</div><div class="sv" id="s-ab">—</div><div class="ssub">students</div></div>
-      </div>
-      <div class="g2">
-        <div class="card">
-          <div class="ch"><span class="ct">Recent sessions</span></div>
-          <div class="cb" id="dash-recent"><div class="empty">No sessions yet</div></div>
+      <!-- DASHBOARD -->
+      <div id="vw-dash" class="vw on">
+        <!-- Teacher/Admin stats -->
+        <div class="sg" id="dash-teacher-stats" style="display:none;">
+          <div class="sc blue"><div class="sl">My Classes</div><div class="sv" id="s-cls">—</div><div class="ss">assigned</div></div>
+          <div class="sc amb"><div class="sl">Sessions Today</div><div class="sv" id="s-td">—</div><div class="ss">taken today</div></div>
+          <div class="sc grn"><div class="sl">Present Today</div><div class="sv" id="s-pr">—</div><div class="ss">students</div></div>
+          <div class="sc red"><div class="sl">Absent Today</div><div class="sv" id="s-ab">—</div><div class="ss">students</div></div>
         </div>
-        <div class="card">
-          <div class="ch"><span class="ct">Quick actions</span></div>
-          <div class="cb" style="display:flex;flex-direction:column;gap:10px;">
-            <button class="btn bp" onclick="showView('mark')">✅ Mark Attendance Now</button>
-            <button class="btn bo" onclick="showView('hist')">📅 View Attendance History</button>
-            <button class="btn bo" onclick="openMod('mod-cls')">➕ Add New Class</button>
-            <button class="btn bo" onclick="showView('setup')">🔥 Firebase Setup Guide</button>
-          </div>
+        <!-- Student stats -->
+        <div class="sg" id="dash-student-stats" style="display:none;">
+          <div class="sc blue"><div class="sl">My Classes</div><div class="sv" id="s-cls-st">—</div><div class="ss">enrolled</div></div>
+          <div class="sc grn"><div class="sl">Overall Attendance</div><div class="sv" id="s-pct-st">—</div><div class="ss">present rate</div></div>
+          <div class="sc amb"><div class="sl">Sessions Today</div><div class="sv" id="s-td-st">—</div><div class="ss">classes today</div></div>
+          <div class="sc red"><div class="sl">Absent Today</div><div class="sv" id="s-ab-st">—</div><div class="ss">missed today</div></div>
         </div>
-      </div>
-    </div>
-
-    <!-- ── MARK ATTENDANCE ── -->
-    <div id="vw-mark" class="vw">
-      <div class="vt">Mark Attendance</div>
-      <div class="vs">Pick a class, set the date, mark each student</div>
-      <div class="card" style="margin-bottom:18px;">
-        <div class="cb">
-          <div style="display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;">
-            <div class="fg" style="margin:0;flex:1;min-width:180px;">
-              <label class="fl">Class</label>
-              <select class="fi" id="att-cls"></select>
-            </div>
-            <div class="fg" style="margin:0;min-width:150px;">
-              <label class="fl">Date</label>
-              <input class="fi" type="date" id="att-dt"/>
-            </div>
-            <button class="btn bp" style="flex-shrink:0;" onclick="attLoadStudents()">Load Students</button>
-          </div>
-        </div>
-      </div>
-      <div id="att-area" style="display:none;">
-        <div class="card">
-          <div class="ch">
-            <span class="ct"><span id="att-cnt">0</span> students</span>
-            <div style="display:flex;gap:8px;">
-              <button class="btn bo bsm" onclick="attMarkAll('present')">All Present</button>
-              <button class="btn bo bsm" onclick="attMarkAll('absent')">All Absent</button>
-            </div>
-          </div>
-          <div class="cb" id="att-list"></div>
-          <div style="padding:12px 18px;border-top:1px solid var(--border);">
-            <button class="btn bg2 bw" style="height:44px;font-size:15px;" onclick="attSubmit()">Submit Attendance</button>
-          </div>
-        </div>
-      </div>
-      <div id="att-emp" class="empty" style="margin-top:40px;">Select a class above and click "Load Students"</div>
-    </div>
-
-    <!-- ── HISTORY ── -->
-    <div id="vw-hist" class="vw">
-      <div class="vt">Attendance History</div>
-      <div class="vs">Pick a date on the calendar to see sessions taken that day</div>
-      <div class="g2">
-        <div class="card">
-          <div class="ch">
-            <button class="bic" onclick="calPrev()">
-              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
-            </button>
-            <span style="font-family:'Google Sans',sans-serif;font-size:15px;font-weight:500;" id="cal-lbl"></span>
-            <button class="bic" onclick="calNext()">
-              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
-            </button>
-          </div>
-          <div class="cb">
-            <div class="cng">
-              <div class="cdh">Sun</div><div class="cdh">Mon</div><div class="cdh">Tue</div>
-              <div class="cdh">Wed</div><div class="cdh">Thu</div><div class="cdh">Fri</div><div class="cdh">Sat</div>
-              <div id="cal-days" style="display:contents;"></div>
+        <!-- Teacher quick actions -->
+        <div class="g2" id="dash-teacher-actions" style="display:none;">
+          <div class="card"><div class="ch"><span class="ct">Recent sessions</span></div><div class="cb" id="dash-recent"><div class="empty">No sessions yet</div></div></div>
+          <div class="card"><div class="ch"><span class="ct">Quick actions</span></div>
+            <div class="cb" style="display:flex;flex-direction:column;gap:10px;padding-top:16px;">
+              <button class="btn bp" style="justify-content:flex-start;border-radius:var(--r8);height:46px;padding:0 18px;gap:10px;" onclick="gv('mark')"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Mark Attendance Now</button>
+              <button class="btn bo" style="justify-content:flex-start;border-radius:var(--r8);height:46px;padding:0 18px;gap:10px;" onclick="gv('hist')"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>View Attendance History</button>
+              <button class="btn bo" style="justify-content:flex-start;border-radius:var(--r8);height:46px;padding:0 18px;gap:10px;" onclick="openMod('mod-cls')"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M12 4v16m8-8H4"/></svg>Add New Class</button>
+              <button class="btn bo" style="justify-content:flex-start;border-radius:var(--r8);height:46px;padding:0 18px;gap:10px;" onclick="gv('setup')"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/></svg>Firebase Setup Guide</button>
             </div>
           </div>
         </div>
-        <div class="card">
-          <div class="ch">
-            <span class="ct">Sessions — <span id="hist-dl" style="color:var(--primary);">select a date</span></span>
-            <button class="bic" title="Reload" id="hist-reload" style="display:none;" onclick="histReload()">
-              <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-            </button>
-          </div>
-          <div class="cb" id="hist-list"><div class="empty">Pick a date on the calendar</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── CLASSES ── -->
-    <div id="vw-cls" class="vw">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;">
-        <div><div class="vt">Classes</div><div style="font-size:14px;color:var(--t2);">Manage your assigned classes</div></div>
-        <button class="btn bp" onclick="openMod('mod-cls')">+ Add Class</button>
-      </div>
-      <div class="card">
-        <div class="tw">
-          <table>
-            <thead><tr><th>Class Name</th><th>Subject</th><th>Students</th><th>Teacher</th><th></th></tr></thead>
-            <tbody id="cls-tb"><tr><td colspan="5" class="empty">No classes yet</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── NOTIFICATIONS ── -->
-    <div id="vw-notif" class="vw">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;">
-        <div><div class="vt">Notifications</div><div style="font-size:14px;color:var(--t2);">Send messages and view your inbox</div></div>
-        <button class="bic" title="Reload" onclick="loadNotifs()">
-          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-        </button>
-      </div>
-      <div id="compose-wrap" style="display:none;margin-bottom:18px;">
-        <div class="card">
-          <div class="ch"><span class="ct">Compose Message</span></div>
-          <div class="cb">
-            <div class="fg"><label class="fl">Title</label><input class="fi" type="text" id="notif-title" placeholder="Notification title"/></div>
-            <div class="fg"><label class="fl">Message</label><textarea class="fi" id="notif-msg" placeholder="Write your message here…"></textarea></div>
-            <div class="fg">
-              <label class="fl">Send To (leave blank to send to all students)</label>
-              <input class="fi" type="text" id="notif-to" placeholder="Type student name to search…"/>
-              <div id="notif-match" style="font-size:12px;color:var(--primary);margin-top:4px;display:none;"></div>
+        <!-- Student quick actions -->
+        <div class="g2" id="dash-student-actions" style="display:none;">
+          <div class="card"><div class="ch"><span class="ct">My Attendance Summary</span></div><div class="cb" id="dash-student-summary"><div class="empty">Loading…</div></div></div>
+          <div class="card"><div class="ch"><span class="ct">Quick actions</span></div>
+            <div class="cb" style="display:flex;flex-direction:column;gap:10px;padding-top:16px;">
+              <button class="btn bp" style="justify-content:flex-start;border-radius:var(--r8);height:46px;padding:0 18px;gap:10px;" onclick="gv('hist')"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>View My Attendance</button>
+              <button class="btn bo" style="justify-content:flex-start;border-radius:var(--r8);height:46px;padding:0 18px;gap:10px;" onclick="gv('notif')"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>View Notifications</button>
+              <button class="btn bo" style="justify-content:flex-start;border-radius:var(--r8);height:46px;padding:0 18px;gap:10px;" onclick="gv('pw')"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>Change Password</button>
             </div>
-            <button class="btn bp" onclick="doSendNotif()">🚀 Send Notification</button>
           </div>
         </div>
       </div>
-      <div class="card">
-        <div class="ch"><span class="ct" id="notif-sect-lbl">Inbox</span></div>
-        <div class="cb" id="notif-list"><div class="loading">Loading…</div></div>
-      </div>
-    </div>
 
-    <!-- ── CHANGE PASSWORD ── -->
-    <div id="vw-pw" class="vw">
-      <div style="max-width:460px;margin:0 auto;">
-        <div class="card">
-          <div class="cb">
-            <div class="pwhero">
-              <div class="pwico">🔐</div>
-              <div class="pwtit">Change Password</div>
-              <div class="pwsub">Enter your current password to verify, then set a new one (min 6 characters).</div>
+      <!-- MARK ATTENDANCE -->
+      <div id="vw-mark" class="vw">
+        <div class="ph"><h2>Mark Attendance</h2><p>Select class, set date &amp; time — you can mark multiple sessions per class per day.</p></div>
+        <div class="card" style="margin-bottom:20px;">
+          <div class="cb" style="padding-top:20px;">
+            <div style="display:grid;grid-template-columns:2fr 1.2fr 1fr 1fr auto;gap:14px;align-items:flex-end;">
+              <div class="fg" style="margin:0;"><label>Class</label><select class="fi" id="att-cls"></select></div>
+              <div class="fg" style="margin:0;"><label>Date</label><input class="fi" type="date" id="att-dt"/></div>
+              <div class="fg" style="margin:0;"><label>Start Time</label><input class="fi" type="time" id="att-st" value="09:00"/></div>
+              <div class="fg" style="margin:0;"><label>End Time</label><input class="fi" type="time" id="att-et" value="10:00"/></div>
+              <button class="btn bp" style="flex-shrink:0;" onclick="attLoad()">Load Students</button>
+            </div>
+          </div>
+        </div>
+        <div id="att-area" style="display:none;">
+          <div class="card">
+            <div class="ch">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span class="ct"><span id="att-cnt">0</span> students</span>
+                <span id="att-lbl" class="chip cb2" style="font-size:12px;"></span>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <button class="btn bo bsm" onclick="attAll('present')">All Present</button>
+                <button class="btn bo bsm" onclick="attAll('absent')">All Absent</button>
+              </div>
+            </div>
+            <div class="cb" style="padding-top:4px;" id="att-list"></div>
+            <div style="padding:14px 20px;border-top:1px solid var(--bdr);">
+              <button class="btn bg bw" style="height:48px;font-size:15px;" onclick="attSubmit()">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+                Submit Attendance
+              </button>
+            </div>
+          </div>
+        </div>
+        <div id="att-emp" class="empty" style="margin-top:48px;"><svg width="52" height="52" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.2" style="margin:0 auto 14px;display:block;color:var(--t4);"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Select a class above and click "Load Students"</div>
+      </div>
+
+      <!-- HISTORY -->
+      <div id="vw-hist" class="vw">
+        <div class="ph"><h2>Attendance History</h2><p>Pick a date to see all sessions taken — multiple sessions per day are shown separately.</p></div>
+        <div class="g2">
+          <div class="card">
+            <div class="ch">
+              <button class="bic" onclick="calPrev()"><svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></button>
+              <span style="font-family:'Google Sans',sans-serif;font-size:15px;font-weight:500;" id="cal-lbl"></span>
+              <button class="bic" onclick="calNext()"><svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></button>
+            </div>
+            <div class="cb" style="padding-top:8px;">
+              <div class="cg">
+                <div class="cdh">Sun</div><div class="cdh">Mon</div><div class="cdh">Tue</div><div class="cdh">Wed</div><div class="cdh">Thu</div><div class="cdh">Fri</div><div class="cdh">Sat</div>
+                <div id="cal-days" style="display:contents;"></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="ch">
+              <span class="ct">Sessions — <span id="hist-dl" style="color:var(--blue);">select a date</span></span>
+              <button class="bic" id="hist-rel" style="display:none;" title="Reload" onclick="histRel()"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg></button>
+            </div>
+            <div class="cb" id="hist-list"><div class="empty">Pick a date on the calendar</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CLASSES -->
+      <div id="vw-cls" class="vw">
+        <div class="phr">
+          <div class="ph"><h2>Classes</h2><p>Manage your assigned classes</p></div>
+          <button class="btn bp bsm" onclick="openMod('mod-cls')"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M12 4v16m8-8H4"/></svg>Add Class</button>
+        </div>
+        <div class="card"><div class="tw"><table>
+          <thead><tr><th>Class Name</th><th>Subject</th><th>Students</th><th>Teacher</th><th></th></tr></thead>
+          <tbody id="cls-tb"><tr><td colspan="5" class="empty">No classes yet</td></tr></tbody>
+        </table></div></div>
+      </div>
+
+      <!-- NOTIFICATIONS -->
+      <div id="vw-notif" class="vw">
+        <div class="phr">
+          <div class="ph"><h2>Notifications</h2><p>Send messages and view your inbox</p></div>
+          <button class="bic" title="Reload" onclick="loadNotifs()"><svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg></button>
+        </div>
+        <div id="notif-cmp" style="display:none;margin-bottom:18px;">
+          <div class="card"><div class="ch"><span class="ct">Compose message</span></div>
+            <div class="cb" style="padding-top:16px;">
+              <div class="fg"><label>Title</label><input class="fi" type="text" id="notif-ttl" placeholder="Notification title"/></div>
+              <div class="fg"><label>Message</label><textarea class="fi" id="notif-msg" placeholder="Write your message…"></textarea></div>
+              <div class="fg"><label>Send to (blank = all students)</label><input class="fi" type="text" id="notif-to" placeholder="Search student name…"/><div id="notif-match" style="font-size:12px;color:var(--blue);margin-top:5px;display:none;"></div></div>
+              <button class="btn bp bsm" onclick="doSendNotif()">Send notification</button>
+            </div>
+          </div>
+        </div>
+        <div class="card"><div class="ch"><span class="ct" id="notif-sect">Inbox</span></div><div class="cb" id="notif-list"><div class="loading">Loading…</div></div></div>
+      </div>
+
+      <!-- CHANGE PW -->
+      <div id="vw-pw" class="vw">
+        <div style="max-width:460px;margin:0 auto;">
+          <div class="card"><div class="cb">
+            <div class="pw-hero">
+              <div style="font-size:52px;margin-bottom:12px;">🔐</div>
+              <div style="font-family:'Google Sans',sans-serif;font-size:24px;font-weight:500;margin-bottom:6px;">Change Password</div>
+              <div style="font-size:14px;color:var(--t2);">Enter your current password, then set a new one (min 6 chars).</div>
             </div>
             <div class="divider"></div>
-            <div class="fg"><label class="fl">Current Password</label><input class="fi" type="password" id="pw-c" placeholder="Your current password"/></div>
-            <div class="fg"><label class="fl">New Password</label><input class="fi" type="password" id="pw-n" placeholder="At least 6 characters"/></div>
-            <div class="fg"><label class="fl">Confirm New Password</label><input class="fi" type="password" id="pw-f" placeholder="Repeat new password"/></div>
-            <button class="btn bp bw" style="height:44px;font-size:15px;" onclick="doChangePw()">Update Password</button>
-          </div>
+            <div class="fg"><label>Current password</label><input class="fi" type="password" id="pw-c" placeholder="Your current password"/></div>
+            <div class="fg"><label>New password</label><input class="fi" type="password" id="pw-n" placeholder="Minimum 6 characters"/></div>
+            <div class="fg"><label>Confirm new password</label><input class="fi" type="password" id="pw-f" placeholder="Repeat new password"/></div>
+            <button class="btn bp bw" onclick="doChangePw()">Update password</button>
+          </div></div>
         </div>
       </div>
-    </div>
 
-    <!-- ── FIREBASE SETUP ── -->
-    <div id="vw-setup" class="vw">
-      <div class="vt">Firebase Setup</div>
-      <div class="vs">Connect to your existing project — same DB as the Android app</div>
-
-      <div class="infobanner">
-        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-        <div>This website uses the <strong>exact same Firebase project</strong> as your Android app — same Firestore, same Auth users, same data. No migration needed.</div>
-      </div>
-
-      <div class="g2" style="align-items:start;">
-        <div class="card">
-          <div class="ch"><span class="ct">Connect to Firebase (5 steps)</span></div>
-          <div class="cb">
-            <div class="stp"><div class="spn">1</div><div class="spb"><h4>Open your Firebase project</h4><p>Go to <strong>console.firebase.google.com</strong> and open the same project used for the Android app.</p></div></div>
-            <div class="stp"><div class="spn">2</div><div class="spb"><h4>Register a Web App</h4><p>Project Settings → Your apps → click the Web icon <code>&lt;/&gt;</code> → give it a nickname → Register → copy the <code>firebaseConfig</code> object shown.</p></div></div>
-            <div class="stp"><div class="spn">3</div><div class="spb">
-              <h4>Paste config into this file</h4>
-              <p>Scroll to the bottom of <code>index.html</code>, find the <code>PASTE YOUR FIREBASE CONFIG HERE</code> comment, and replace the placeholder:</p>
-              <div class="codebox">const firebaseConfig = {
+      <!-- SETUP -->
+      <div id="vw-setup" class="vw">
+        <div class="ph"><h2>Firebase Setup</h2><p>Same database as your Android app — no migration needed</p></div>
+        <div class="infob" style="margin-bottom:22px;">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <div>This website uses the <strong>exact same Firebase project</strong> as your Android app — same Firestore, same Auth, same data. Just paste the config and it works.</div>
+        </div>
+        <div class="g2" style="align-items:start;">
+          <div class="card"><div class="ch"><span class="ct">Connect Firebase</span></div><div class="cb" style="padding-top:20px;">
+            <div class="stp"><div class="spn">1</div><div class="spb"><h4>Open Firebase Console</h4><p>Go to <strong>console.firebase.google.com</strong> → open your project.</p></div></div>
+            <div class="stp"><div class="spn">2</div><div class="spb"><h4>Register Web App</h4><p>Project Settings → Your apps → click <code>&lt;/&gt;</code> → nickname → Register → copy the <code>firebaseConfig</code>.</p></div></div>
+            <div class="stp"><div class="spn">3</div><div class="spb"><h4>Paste into this file</h4><p>Find <code>PASTE YOUR FIREBASE CONFIG HERE</code> in index.html and replace:</p><div class="codebox">const firebaseConfig = {
   apiKey: "AIza...",
-  authDomain: "your-app.firebaseapp.com",
-  projectId: "your-app-id",
+  projectId: "your-app",
   ...
-};</div>
-            </div></div>
-            <div class="stp"><div class="spn">4</div><div class="spb">
-              <h4>Update Firestore Rules</h4>
-              <p>Firebase Console → Build → Firestore → Rules tab → paste:</p>
-              <div class="codebox">rules_version = '2';
+};</div></div></div>
+            <div class="stp"><div class="spn">4</div><div class="spb"><h4>Update Firestore Rules</h4><div class="codebox">rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /{document=**} {
       allow read, write: if request.auth != null;
     }
   }
-}</div>
-              <p>Click Publish.</p>
+}</div></div></div>
+            <div class="stp" style="margin-bottom:0;"><div class="spn">5</div><div class="spb"><h4>Add authorized domain</h4><p>Authentication → Settings → Authorized domains → Add your GitHub Pages domain: <code>your-username.github.io</code></p></div></div>
+          </div></div>
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div class="card"><div class="ch"><span class="ct">Deploy to GitHub Pages</span></div><div class="cb" style="padding-top:20px;">
+              <div class="stp"><div class="spn">1</div><div class="spb"><h4>Create repo</h4><p>github.com → New → name: <code>attendease</code> → Public → Create.</p></div></div>
+              <div class="stp"><div class="spn">2</div><div class="spb"><h4>Upload file</h4><p>Add file → Upload → drag <code>index.html</code> → Commit.</p></div></div>
+              <div class="stp"><div class="spn">3</div><div class="spb"><h4>Enable Pages</h4><p>Settings → Pages → Source: main → / (root) → Save.</p></div></div>
+              <div class="stp" style="margin-bottom:0;"><div class="spn">4</div><div class="spb"><h4>Live at:</h4><div class="codebox">https://smkvjand.github.io/attendease</div></div></div>
             </div></div>
-            <div class="stp" style="margin-bottom:0;"><div class="spn">5</div><div class="spb"><h4>Add authorized domain</h4><p>Firebase Console → Authentication → Settings → Authorized domains → Add → paste your GitHub Pages URL: <code>your-username.github.io</code></p></div></div>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:16px;">
-          <div class="card">
-            <div class="ch"><span class="ct">Deploy to GitHub Pages</span></div>
-            <div class="cb">
-              <div class="stp"><div class="spn">1</div><div class="spb"><h4>Create a GitHub repo</h4><p>github.com → New repository → name: <code>attendease</code> → Public → Create repository.</p></div></div>
-              <div class="stp"><div class="spn">2</div><div class="spb"><h4>Upload this file</h4><p>In the repo, click "Add file" → "Upload files" → drag and drop <code>index.html</code> → Commit changes.</p></div></div>
-              <div class="stp"><div class="spn">3</div><div class="spb"><h4>Enable GitHub Pages</h4><p>Repo → Settings → Pages → Source: Deploy from branch → Branch: main → folder: / (root) → Save.</p></div></div>
-              <div class="stp" style="margin-bottom:0;"><div class="spn">4</div><div class="spb"><h4>Done! Site is live at:</h4><div class="codebox">https://your-username.github.io/attendease</div></div></div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="ch"><span class="ct">Collections used</span></div>
-            <div class="tw">
-              <table>
-                <thead><tr><th>Collection</th><th>Key fields</th></tr></thead>
-                <tbody>
-                  <tr><td><code>users</code></td><td style="color:var(--t2);font-size:12px;">uid, name, email, role, classIds[]</td></tr>
-                  <tr><td><code>classes</code></td><td style="color:var(--t2);font-size:12px;">classId, className, subject, teacherId</td></tr>
-                  <tr><td><code>attendance</code></td><td style="color:var(--t2);font-size:12px;">studentId, classId, date, sessionId, status</td></tr>
-                  <tr><td><code>sessions</code></td><td style="color:var(--t2);font-size:12px;">classId, date, startTime, endTime</td></tr>
-                  <tr><td><code>notifications</code></td><td style="color:var(--t2);font-size:12px;">targetUserId, title, message, timestamp</td></tr>
-                </tbody>
-              </table>
-            </div>
+            <div class="card"><div class="ch"><span class="ct">Collections</span></div><div class="tw"><table>
+              <thead><tr><th>Collection</th><th>Key fields</th></tr></thead>
+              <tbody>
+                <tr><td><code>users</code></td><td style="color:var(--t2);font-size:12px;">uid, name, role, classIds[]</td></tr>
+                <tr><td><code>classes</code></td><td style="color:var(--t2);font-size:12px;">classId, className, teacherId</td></tr>
+                <tr><td><code>attendance</code></td><td style="color:var(--t2);font-size:12px;">studentId, classId, date, sessionId</td></tr>
+                <tr><td><code>sessions</code></td><td style="color:var(--t2);font-size:12px;">classId, date, startTime, endTime</td></tr>
+                <tr><td><code>notifications</code></td><td style="color:var(--t2);font-size:12px;">targetUserId, title, timestamp</td></tr>
+              </tbody>
+            </table></div></div>
           </div>
         </div>
       </div>
-    </div>
 
-  </div><!-- /mn -->
-</div><!-- /pg-app -->
-
-<!-- ─── MODALS ─────────────────────────────────────────────── -->
-<div class="ov" id="mod-cls" onclick="if(event.target===this)closeMod('mod-cls')">
-  <div class="mo">
-    <div class="mh"><span class="mt">Add New Class</span><button class="bic" onclick="closeMod('mod-cls')">✕</button></div>
-    <div class="mb">
-      <div class="fg"><label class="fl">Class Name</label><input class="fi" id="nc-nm" placeholder="e.g. MAT BCS"/></div>
-      <div class="fg"><label class="fl">Subject</label><input class="fi" id="nc-sb" placeholder="e.g. Mathematics"/></div>
-      <div class="fg" style="margin-bottom:0;"><label class="fl">Room (optional)</label><input class="fi" id="nc-rm" placeholder="e.g. Room 101"/></div>
-    </div>
-    <div class="mf">
-      <button class="btn bo" onclick="closeMod('mod-cls')">Cancel</button>
-      <button class="btn bp" onclick="doAddCls()">Add Class</button>
     </div>
   </div>
 </div>
 
-<div class="ov" id="mod-sess" onclick="if(event.target===this)closeMod('mod-sess')">
-  <div class="mo" style="max-width:560px;">
-    <div class="mh"><span class="mt" id="mod-sess-t">Session</span><button class="bic" onclick="closeMod('mod-sess')">✕</button></div>
-    <div class="mb" id="mod-sess-b"></div>
-    <div class="mf">
-      <button class="btn bo" onclick="closeMod('mod-sess')">Close</button>
-      <button class="btn bp" onclick="doSaveEdits()">Save Changes</button>
+<!-- MODALS -->
+<div class="ov" id="mod-cls" onclick="if(event.target===this)closeMod('mod-cls')">
+  <div class="mo">
+    <div class="mh"><span class="mtl">Add new class</span><button class="bic" onclick="closeMod('mod-cls')">✕</button></div>
+    <div class="mb">
+      <div class="fg"><label>Class name</label><input class="fi" id="nc-nm" placeholder="e.g. MAT BCS"/></div>
+      <div class="fg"><label>Subject</label><input class="fi" id="nc-sb" placeholder="e.g. Mathematics"/></div>
+      <div class="fg" style="margin-bottom:0;"><label>Room (optional)</label><input class="fi" id="nc-rm" placeholder="e.g. Room 101"/></div>
     </div>
+    <div class="mf"><button class="btn bo bsm" onclick="closeMod('mod-cls')">Cancel</button><button class="btn bp bsm" onclick="doAddCls()">Add class</button></div>
+  </div>
+</div>
+
+<div class="ov" id="mod-sess" onclick="if(event.target===this)closeMod('mod-sess')">
+  <div class="mo" style="max-width:580px;">
+    <div class="mh"><span class="mtl" id="mod-sess-t">Session Details</span><button class="bic" onclick="closeMod('mod-sess')">✕</button></div>
+    <div class="mb" id="mod-sess-b"></div>
+    <div class="mf"><button class="btn bo bsm" onclick="closeMod('mod-sess')">Close</button><button class="btn bp bsm" onclick="doSaveEdits()">Save changes</button></div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
-<!-- ══════════════════════════════════════════════════════════
-     ALL JAVASCRIPT — global scope, no modules, fully working
-     ══════════════════════════════════════════════════════════ -->
 <script>
-
-// ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────
 //  PASTE YOUR FIREBASE CONFIG HERE
-//  Firebase Console → Project Settings → Your apps → Web app
-// ─────────────────────────────────────────────────────────────
-var firebaseConfig = {
+// ─────────────────────────────────────────────────────
+const firebaseConfig = {
   apiKey:            "AIzaSyCfbn8FCMwmI9K8ciWLxZ-jZpbgDpncyHA",
   authDomain:        "attendanceapp-865da.firebaseapp.com",
   databaseURL:       "https://attendanceapp-865da-default-rtdb.firebaseio.com",
@@ -612,599 +507,542 @@ var firebaseConfig = {
   appId:             "1:956662535489:web:70a05d18829445c7f03dc0",
   measurementId:     "G-YYCESEJG64"
 };
-// ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────
 
-var FB_ON = firebaseConfig.apiKey !== "YOUR_API_KEY";
+const FB = firebaseConfig.apiKey !== "YOUR_API_KEY";
+if (FB) firebase.initializeApp(firebaseConfig);
+const fdb  = () => firebase.firestore();
+const fauth= () => firebase.auth();
+const fts  = () => firebase.firestore.FieldValue.serverTimestamp();
 
-// Initialize Firebase app using compat SDK (already loaded via <script> tags above)
-if (FB_ON && typeof firebase !== "undefined") {
-  firebase.initializeApp(firebaseConfig);
-}
-
-// References (set on first use by getSDK())
-var _auth = null, _db = null, _sdk = {};
-
-// ── APP STATE ────────────────────────────────────────────────
-var ST = {
-  user: null, profile: null,
-  classes: [], allStudents: [],
-  attStudents: [], attClassId: null,
-  editRecords: [],
-  resolvedNotifUid: null,
-  calY: new Date().getFullYear(),
-  calM: new Date().getMonth(),
-  selDate: null,
+const ST = {
+  user:null,profile:null,classes:[],allStudents:[],
+  attStudents:[],attClassId:null,editRecords:[],
+  resolvedNotifUid:null,sessionDates:new Set(),
+  calY:new Date().getFullYear(),calM:new Date().getMonth(),selDate:null,
 };
-var TODAY = new Date().toISOString().slice(0,10);
+const TODAY = new Date().toISOString().slice(0,10);
+const VTITLES = {dash:"Dashboard",mark:"Mark Attendance",hist:"Attendance History",cls:"Classes",notif:"Notifications",pw:"Change Password",setup:"Firebase Setup"};
 
-// ── DEMO DATA ────────────────────────────────────────────────
-var DH = []; // demo history — grows as attendance is submitted
-var DC = [
-  {classId:"c1",className:"MAT BCS",subject:"Mathematics",teacherName:"ram",studentCount:5},
-  {classId:"c2",className:"PHY BCS",subject:"Physics",teacherName:"ram",studentCount:3},
-];
-var DS = {
-  c1:[
-    {uid:"s1",name:"Akirala Aashrith",rollNo:"2025BCS-004",email:"bcs_2025004@iiitm.ac.in"},
-    {uid:"s2",name:"Ajinkya Rathod",rollNo:"2025BCS-002",email:"bcs_2025002@iiitm.ac.in"},
-    {uid:"s3",name:"Akarsh Singh",rollNo:"2025BCS-003",email:"bcs_2025003@iiitm.ac.in"},
-    {uid:"s4",name:"Aman Raghuvanshi",rollNo:"2025BCS-008",email:"bcs_2025008@iiitm.ac.in"},
-    {uid:"s5",name:"Anika Kanade",rollNo:"2025BCS-009",email:"bcs_2025009@iiitm.ac.in"},
-  ],
-  c2:[
-    {uid:"s6",name:"Aksh Bhagat",rollNo:"2025BCS-005",email:"bcs_2025005@iiitm.ac.in"},
-    {uid:"s7",name:"Akshay Naphade",rollNo:"2025BCS-006",email:"bcs_2025006@iiitm.ac.in"},
-  ],
-};
-// Seed today with demo sessions
-DH.push(
-  {sessionId:"demo1",classId:"c1",className:"MAT BCS",subject:"Mathematics",date:TODAY,startTime:"09:00",endTime:"10:00",
-   records:[{studentId:"s1",studentName:"Akirala Aashrith",status:"absent"},{studentId:"s2",studentName:"Ajinkya Rathod",status:"present"},{studentId:"s3",studentName:"Akarsh Singh",status:"present"},{studentId:"s4",studentName:"Aman Raghuvanshi",status:"late"},{studentId:"s5",studentName:"Anika Kanade",status:"present"}]},
-  {sessionId:"demo2",classId:"c2",className:"PHY BCS",subject:"Physics",date:TODAY,startTime:"11:00",endTime:"12:00",
-   records:[{studentId:"s6",studentName:"Aksh Bhagat",status:"present"},{studentId:"s7",studentName:"Akshay Naphade",status:"absent"}]}
-);
-
-// ── FIREBASE COMPAT SDK (loaded via <script> tags in <head>, synchronous) ──
-// Uses firebase compat layer — no ES modules, no race conditions, all global
-function getSDK() {
-  // compat SDK exposes firebase.auth(), firebase.firestore() globally
-  if (FB_ON && typeof firebase !== "undefined") {
-    if (!_auth) _auth = firebase.auth();
-    if (!_db)   _db   = firebase.firestore();
-  }
-  return { auth: _auth, db: _db };
-}
-
-// Auto-login on page refresh (fires after compat SDK scripts load)
-function initFirebaseListeners() {
-  if (!FB_ON || typeof firebase === "undefined") return;
-  _auth = firebase.auth();
-  _db   = firebase.firestore();
-  firebase.auth().onAuthStateChanged(async function(u) {
-    if (u && !window._didAutoLogin) {
-      window._didAutoLogin = true;
+// AUTO-LOGIN
+if (FB) {
+  firebase.auth().onAuthStateChanged(async u => {
+    if (u && !ST.user) {
       ST.user = u;
-      try {
-        var snap = await firebase.firestore().collection("users").doc(u.uid).get();
-        ST.profile = snap.exists ? snap.data() : { name: u.email, role:"teacher" };
-      } catch(e) { ST.profile = { name: u.email, role:"teacher" }; }
+      try { const s=await fdb().collection("users").doc(u.uid).get(); ST.profile=s.exists?s.data():{name:u.email,role:"teacher"}; }
+      catch(e) { ST.profile={name:u.email,role:"teacher"}; }
       enterApp();
     }
   });
 }
 
-// ── AUTH FUNCTIONS ───────────────────────────────────────────
+// AUTH
 function switchTab(t) {
-  document.getElementById("tab-li").classList.toggle("on", t==="li");
-  document.getElementById("tab-rg").classList.toggle("on", t==="rg");
-  document.getElementById("form-li").style.display = t==="li" ? "block" : "none";
-  document.getElementById("form-rg").style.display = t==="rg" ? "block" : "none";
+  ["li","rg"].forEach(x=>{
+    document.getElementById("tab-"+x).classList.toggle("on",x===t);
+    document.getElementById("form-"+x).style.display=x===t?"":"none";
+  });
 }
-
 async function doLogin() {
-  var em = document.getElementById("li-em").value.trim();
-  var pw = document.getElementById("li-pw").value;
-  if (!em || !pw) { toast("Enter email and password","err"); return; }
-  if (!FB_ON) { demoMode(); return; }
+  const em=document.getElementById("li-em").value.trim(), pw=document.getElementById("li-pw").value;
+  if(!em||!pw){toast("Enter email and password","err");return;}
+  if(!FB){demoMode();return;}
+  const b=document.getElementById("li-btn"); b.disabled=true; b.textContent="Signing in…";
   try {
-    var cred = await firebase.auth().signInWithEmailAndPassword(em, pw);
-    var snap = await firebase.firestore().collection("users").doc(cred.user.uid).get();
-    ST.user    = cred.user;
-    ST.profile = snap.exists ? snap.data() : {name:em, role:"teacher"};
+    const c=await fauth().signInWithEmailAndPassword(em,pw);
+    const s=await fdb().collection("users").doc(c.user.uid).get();
+    ST.user=c.user; ST.profile=s.exists?s.data():{name:em,role:"teacher"};
     enterApp();
   } catch(e) {
-    if (e.code==="auth/invalid-credential"||e.code==="auth/user-not-found"||e.code==="auth/wrong-password")
-      toast("Incorrect email or password","err");
-    else toast(e.message||"Login failed","err");
+    b.disabled=false; b.textContent="Sign in";
+    toast(["auth/invalid-credential","auth/user-not-found","auth/wrong-password"].includes(e.code)?"Incorrect email or password":e.message,"err");
   }
 }
-
 async function doRegister() {
-  var nm = document.getElementById("rg-nm").value.trim();
-  var em = document.getElementById("rg-em").value.trim();
-  var pw = document.getElementById("rg-pw").value;
-  var rl = document.getElementById("rg-rl").value;
-  if (!nm||!em||!pw) { toast("Please fill all fields","err"); return; }
-  if (pw.length < 6) { toast("Password must be at least 6 characters","err"); return; }
-  if (!FB_ON) { ST.user={uid:"demo",email:em}; ST.profile={name:nm,role:rl}; enterApp(); return; }
+  const nm=document.getElementById("rg-nm").value.trim(), em=document.getElementById("rg-em").value.trim();
+  const pw=document.getElementById("rg-pw").value, rl=document.getElementById("rg-rl").value;
+  if(!nm||!em||!pw){toast("Fill all fields","err");return;}
+  if(pw.length<6){toast("Password: minimum 6 characters","err");return;}
+  if(!FB){ST.user={uid:"demo",email:em};ST.profile={name:nm,role:rl};enterApp();return;}
+  const b=document.getElementById("rg-btn"); b.disabled=true; b.textContent="Creating…";
   try {
-    var cred = await firebase.auth().createUserWithEmailAndPassword(em, pw);
-    var p = {uid:cred.user.uid,name:nm,email:em,role:rl,createdAt:firebase.firestore.FieldValue.serverTimestamp()};
-    await firebase.firestore().collection("users").doc(cred.user.uid).set(p);
-    ST.user = cred.user; ST.profile = p;
-    enterApp();
-    toast("Account created! Welcome to AttendEase");
+    const c=await fauth().createUserWithEmailAndPassword(em,pw);
+    const p={uid:c.user.uid,name:nm,email:em,role:rl,createdAt:fts()};
+    await fdb().collection("users").doc(c.user.uid).set(p);
+    ST.user=c.user; ST.profile=p; enterApp(); toast("Account created! Welcome");
   } catch(e) {
-    if (e.code==="auth/email-already-in-use") toast("This email is already registered","err");
-    else toast(e.message||"Registration failed","err");
+    b.disabled=false; b.textContent="Create account";
+    toast(e.code==="auth/email-already-in-use"?"Email already registered":e.message,"err");
   }
 }
+function demoMode(){ST.user={uid:"demo",email:"demo@iiitm.ac.in"};ST.profile={name:"Demo Teacher",role:"teacher"};enterApp();toast("Demo mode — Firebase not connected");}
+async function doLogout(){if(FB)await fauth().signOut().catch(()=>{});ST.user=null;ST.profile=null;showPage("pg-login");}
 
-async function demoMode() {
-  ST.user    = {uid:"demo", email:"demo@iiitm.ac.in"};
-  ST.profile = {name:"Demo Teacher", role:"teacher"};
-  enterApp();
-  toast("Running in demo mode — Firebase not connected");
-}
-
-async function doLogout() {
-  if (FB_ON && typeof firebase !== "undefined") { await firebase.auth().signOut().catch(()=>{}); }
-  ST.user=null; ST.profile=null; window._didAutoLogin=false;
-  showPage("pg-login");
-}
-
-// ── ENTER APP ────────────────────────────────────────────────
+// ENTER APP
 async function enterApp() {
   showPage("pg-app");
-  var nm = ST.profile?.name || ST.user?.email || "User";
-  var rl = ST.profile?.role || "teacher";
-  document.getElementById("sb-av").textContent = nm.charAt(0).toUpperCase();
-  document.getElementById("sb-nm").textContent = nm;
-  document.getElementById("sb-rl").textContent = rl.charAt(0).toUpperCase()+rl.slice(1);
-  document.getElementById("tb-date").textContent =
-    new Date().toLocaleDateString("en-IN",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
-  document.getElementById("att-dt").value = TODAY;
-
-  var isTeacher = rl==="teacher"||rl==="admin";
-  document.getElementById("compose-wrap").style.display  = isTeacher ? "block" : "none";
-  document.getElementById("notif-sect-lbl").textContent  = isTeacher ? "Recently Sent" : "Inbox";
-
-  await loadClasses();
-  renderClasses();
-  fillClassSel();
-  renderCal();
-  loadDash();
-  loadNotifs();
+  const nm=ST.profile?.name||ST.user?.email||"User", rl=ST.profile?.role||"teacher";
+  document.getElementById("sb-av").textContent=nm.charAt(0).toUpperCase();
+  document.getElementById("sb-nm").textContent=nm;
+  document.getElementById("sb-rl").textContent=rl.charAt(0).toUpperCase()+rl.slice(1);
+  document.getElementById("tb-dt").textContent=new Date().toLocaleDateString("en-IN",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+  document.getElementById("att-dt").value=TODAY;
+  const isTch=rl==="teacher"||rl==="admin";
+  document.getElementById("notif-cmp").style.display=isTch?"block":"none";
+  document.getElementById("notif-sect").textContent=isTch?"Recently sent":"Inbox";
+  // Students cannot create or manage classes
+  document.getElementById("ni-cls").style.display=isTch?"":"none";
+  document.getElementById("ni-mark").style.display=isTch?"":"none";
+  await loadClasses(); renderClasses(); fillSel();
+  await loadSessDates(); renderCal();
+  loadDash(); loadNotifs();
+  // If student, pre-load their attendance on history view
+  if(ST.profile?.role==="student") loadStudentHistory();
 }
 
-// ── CLASSES ──────────────────────────────────────────────────
+// CLASSES
 async function loadClasses() {
-  if (!FB_ON || typeof firebase === "undefined") { ST.classes = DC.slice(); return; }
-  var rl = ST.profile?.role;
-  var ref = firebase.firestore().collection("classes");
-  var q = rl==="admin" ? ref : ref.where("teacherId","==",ST.user.uid);
-  var snap = await q.get();
-  ST.classes = snap.docs.map(d => ({classId:d.id,...d.data()}));
+  if(!FB){ST.classes=[];return;}
+  const rl=ST.profile?.role; let ref=fdb().collection("classes");
+  if(rl!=="admin")ref=ref.where("teacherId","==",ST.user.uid);
+  const s=await ref.get().catch(()=>({docs:[]}));
+  ST.classes=s.docs.map(d=>({classId:d.id,...d.data()}));
 }
-
 function renderClasses() {
-  document.getElementById("s-cls").textContent = ST.classes.length;
-  var tb = document.getElementById("cls-tb");
-  if (!ST.classes.length) { tb.innerHTML='<tr><td colspan="5" class="empty">No classes yet. Add one above.</td></tr>'; return; }
-  tb.innerHTML = ST.classes.map(c=>`
-    <tr>
-      <td><strong>${c.className}</strong></td>
-      <td>${c.subject}</td>
-      <td><span class="chip cb2">${c.studentCount||0} students</span></td>
-      <td style="color:var(--t2);">${c.teacherName||"—"}</td>
-      <td><button class="btn brd bsm" onclick="doRmCls('${c.classId}')">Remove</button></td>
-    </tr>`).join("");
+  document.getElementById("s-cls").textContent=ST.classes.length;
+  const tb=document.getElementById("cls-tb");
+  if(!ST.classes.length){tb.innerHTML='<tr><td colspan="5" class="empty" style="padding:32px;">No classes yet. Click "Add Class" to get started.</td></tr>';return;}
+  tb.innerHTML=ST.classes.map(c=>`<tr><td><strong>${c.className}</strong></td><td>${c.subject}</td><td><span class="chip cb2">${c.studentCount||0} students</span></td><td style="color:var(--t2);">${c.teacherName||"—"}</td><td><button class="btn brd bxs" onclick="doRmCls('${c.classId}')">Remove</button></td></tr>`).join("");
 }
-
-function fillClassSel() {
-  var s = document.getElementById("att-cls");
-  s.innerHTML = '<option value="">— Select class —</option>' +
-    ST.classes.map(c=>`<option value="${c.classId}">${c.className}  ·  ${c.subject}</option>`).join("");
+function fillSel() {
+  const s=document.getElementById("att-cls");
+  s.innerHTML='<option value="">— Select class —</option>'+ST.classes.map(c=>`<option value="${c.classId}">${c.className}  ·  ${c.subject}</option>`).join("");
 }
-
 async function doAddCls() {
-  var nm = document.getElementById("nc-nm").value.trim();
-  var sb = document.getElementById("nc-sb").value.trim();
-  var rm = document.getElementById("nc-rm").value.trim();
-  if (!nm||!sb) { toast("Enter class name and subject","err"); return; }
-  var nc = {className:nm,subject:sb,room:rm,teacherId:ST.user?.uid||"demo",teacherName:ST.profile?.name||"Teacher",studentCount:0};
-  if (!FB_ON || typeof firebase === "undefined") {
-    nc.classId = "c"+Date.now(); ST.classes.push(nc);
-  } else {
-    var ref = await firebase.firestore().collection("classes").add({...nc,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-    nc.classId = ref.id; ST.classes.push(nc);
-  }
-  renderClasses(); fillClassSel();
-  closeMod("mod-cls");
+  if(ST.profile?.role==="student"){toast("Students cannot create classes","err");return;}
+  const nm=document.getElementById("nc-nm").value.trim(), sb=document.getElementById("nc-sb").value.trim(), rm=document.getElementById("nc-rm").value.trim();
+  if(!nm||!sb){toast("Enter class name and subject","err");return;}
+  const nc={className:nm,subject:sb,room:rm,teacherId:ST.user?.uid||"demo",teacherName:ST.profile?.name||"Teacher",studentCount:0};
+  if(!FB){nc.classId="c"+Date.now();ST.classes.push(nc);}
+  else{const r=await fdb().collection("classes").add({...nc,createdAt:fts()});nc.classId=r.id;ST.classes.push(nc);}
+  renderClasses();fillSel();closeMod("mod-cls");
   ["nc-nm","nc-sb","nc-rm"].forEach(id=>document.getElementById(id).value="");
   toast("Class added!");
 }
-
 async function doRmCls(id) {
-  if (!confirm("Delete this class?")) return;
-  if (FB_ON && typeof firebase !== "undefined") { await firebase.firestore().collection("classes").doc(id).delete(); }
-  ST.classes = ST.classes.filter(c=>c.classId!==id);
-  renderClasses(); fillClassSel();
-  toast("Class removed");
+  if(!confirm("Delete this class?"))return;
+  if(FB)await fdb().collection("classes").doc(id).delete().catch(()=>{});
+  ST.classes=ST.classes.filter(c=>c.classId!==id);
+  renderClasses();fillSel();toast("Class removed");
 }
 
-// ── MARK ATTENDANCE ──────────────────────────────────────────
-async function attLoadStudents() {
-  var cid = document.getElementById("att-cls").value;
-  if (!cid) { toast("Select a class first","err"); return; }
-  var students;
-  if (!FB_ON || typeof firebase === "undefined") {
-    students = DS[cid] || [];
-  } else {
-    var snap = await firebase.firestore().collection("users").where("classIds","array-contains",cid).get();
-    students = snap.docs.map(d=>({uid:d.id,...d.data()}));
-  }
-  ST.attStudents = students.map(s=>({...s,status:"present"}));
-  ST.attClassId  = cid;
-  document.getElementById("att-cnt").textContent = ST.attStudents.length;
-  if (!ST.attStudents.length) {
+// MARK ATTENDANCE
+async function attLoad() {
+  if(ST.profile?.role==="student"){toast("Students cannot mark attendance","err");return;}
+  const cid=document.getElementById("att-cls").value;
+  if(!cid){toast("Select a class first","err");return;}
+  if(!FB){toast("Connect Firebase to load students","err");return;}
+  const snap=await fdb().collection("users").where("classIds","array-contains",cid).get().catch(()=>({docs:[]}));
+  const students=snap.docs.map(d=>({uid:d.id,...d.data()}));
+  ST.attStudents=students.map(s=>({...s,status:"present"}));
+  ST.attClassId=cid;
+  const st=document.getElementById("att-st").value||"", et=document.getElementById("att-et").value||"";
+  const cls=ST.classes.find(c=>c.classId===cid)||{};
+  document.getElementById("att-cnt").textContent=students.length;
+  document.getElementById("att-lbl").textContent=`${cls.className||""}  ${st}${et?" – "+et:""}`;
+  if(!students.length){
     document.getElementById("att-area").style.display="none";
-    document.getElementById("att-emp").textContent="No students found in this class.";
-    document.getElementById("att-emp").style.display="block";
-    return;
+    document.getElementById("att-emp").innerHTML='<svg width="52" height="52" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.2" style="margin:0 auto 14px;display:block;color:var(--t4);"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>No students in this class. Add them using the bulk_create.js script.';
+    document.getElementById("att-emp").style.display="block"; return;
   }
   document.getElementById("att-emp").style.display="none";
   document.getElementById("att-area").style.display="block";
   renderAttList();
 }
-
 function renderAttList() {
-  document.getElementById("att-list").innerHTML = ST.attStudents.map((s,i)=>`
-    <div class="sr" id="ar-${i}">
+  document.getElementById("att-list").innerHTML=ST.attStudents.map((s,i)=>`
+    <div class="srow" id="ar-${i}">
       <div class="sav">${s.name.charAt(0).toUpperCase()}</div>
-      <div class="si"><div class="sn">${s.name}</div><div class="sk">${s.rollNo||s.email||""}</div></div>
+      <div style="flex:1;min-width:0;"><div class="snm">${s.name}</div><div class="srl">${s.rollNo||s.email||""}</div></div>
       <div class="stbs">
-        <button class="stb p${s.status==="present"?" on":""}" onclick="attSetSt(${i},'present',this)">Present</button>
-        <button class="stb a${s.status==="absent"?" on":""}" onclick="attSetSt(${i},'absent',this)">Absent</button>
-        <button class="stb l${s.status==="late"?" on":""}" onclick="attSetSt(${i},'late',this)">Late</button>
+        <button class="stb p${s.status==="present"?" on":""}" onclick="attSt(${i},'present',this)">Present</button>
+        <button class="stb a${s.status==="absent"?" on":""}" onclick="attSt(${i},'absent',this)">Absent</button>
+        <button class="stb l${s.status==="late"?" on":""}" onclick="attSt(${i},'late',this)">Late</button>
       </div>
     </div>`).join("");
 }
-
-function attSetSt(i,status,btn) {
-  ST.attStudents[i].status = status;
-  var row = document.getElementById("ar-"+i);
-  row.querySelectorAll(".stb").forEach(b=>b.classList.remove("on"));
-  btn.classList.add("on");
-}
-
-function attMarkAll(status) {
-  ST.attStudents.forEach(s=>s.status=status);
-  renderAttList();
-}
+function attSt(i,s,btn){ST.attStudents[i].status=s;document.getElementById("ar-"+i).querySelectorAll(".stb").forEach(b=>b.classList.remove("on"));btn.classList.add("on");}
+function attAll(s){ST.attStudents.forEach(x=>x.status=s);renderAttList();}
 
 async function attSubmit() {
-  var date = document.getElementById("att-dt").value;
-  if (!ST.attClassId||!date||!ST.attStudents.length) { toast("Select class and load students first","err"); return; }
-  var sessId = "sess_"+Date.now();
-  var cls = ST.classes.find(c=>c.classId===ST.attClassId) || {className:"",subject:""};
-  var recs = ST.attStudents.map(s=>({
+  if(ST.profile?.role==="student"){toast("Students cannot submit attendance","err");return;}
+  const date=document.getElementById("att-dt").value;
+  const st=document.getElementById("att-st").value;
+  const et=document.getElementById("att-et").value;
+  if(!ST.attClassId||!date||!ST.attStudents.length){toast("Select class and load students first","err");return;}
+
+  // UNIQUE sessId per submission — timestamp + random — ensures same class
+  // same day never overwrites a previous session
+  const sessId="sess_"+Date.now()+"_"+Math.random().toString(36).slice(2,8);
+  const cls=ST.classes.find(c=>c.classId===ST.attClassId)||{};
+  const recs=ST.attStudents.map(s=>({
     studentId:s.uid,studentName:s.name,classId:ST.attClassId,
-    className:cls.className,date,status:s.status,
+    className:cls.className||"",date,status:s.status,
     sessionId:sessId,markedBy:ST.user?.uid||"demo",timestamp:Date.now(),
   }));
 
-  if (FB_ON && typeof firebase !== "undefined") {
-    var batch = firebase.firestore().batch();
-    for (var r of recs) {
-      var did = r.studentId+"_"+ST.attClassId+"_"+sessId;
-      var rr = {...r,recordId:did};
-      batch.set(firebase.firestore().collection("attendance").doc(did), rr);
-    }
-    await batch.commit();
-    await firebase.firestore().collection("sessions").doc(sessId).set({
-      sessionId:sessId,classId:ST.attClassId,className:cls.className,subject:cls.subject,
-      teacherId:ST.user?.uid,date,startTime:"",endTime:"",
-      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
-    });
+  if(FB){
+    try {
+      const batch=fdb().batch();
+      // docId = studentId_classId_sessionId — unique per student per session
+      recs.forEach(r=>{const did=`${r.studentId}_${ST.attClassId}_${sessId}`;batch.set(fdb().collection("attendance").doc(did),{...r,recordId:did});});
+      await batch.commit();
+      await fdb().collection("sessions").doc(sessId).set({
+        sessionId:sessId,classId:ST.attClassId,className:cls.className||"",subject:cls.subject||"",
+        teacherId:ST.user.uid,date,startTime:st,endTime:et,createdAt:fts(),
+      });
+    } catch(e){toast("Error: "+e.message,"err");return;}
   }
-  // always update demo data so history shows it
-  DH.unshift({sessionId:sessId,classId:ST.attClassId,className:cls.className,subject:cls.subject,date,startTime:"",endTime:"",records:recs});
 
-  var p=recs.filter(r=>r.status==="present").length;
-  var a=recs.filter(r=>r.status==="absent").length;
-  var l=recs.filter(r=>r.status==="late").length;
-  toast("✅ Saved!  ✓"+p+" present  ✗"+a+" absent  ⏰"+l+" late");
+  const p=recs.filter(r=>r.status==="present").length;
+  const a=recs.filter(r=>r.status==="absent").length;
+  const l=recs.filter(r=>r.status==="late").length;
+  toast(`✅ Saved!  ✓${p} present  ✗${a} absent  ⏰${l} late`);
+  ST.sessionDates.add(date); renderCal();
+
+  // Reset — ready to mark another class
+  document.getElementById("att-area").style.display="none";
+  document.getElementById("att-emp").innerHTML='<svg width="52" height="52" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.2" style="margin:0 auto 14px;display:block;color:var(--t4);"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Attendance saved! Select another class to mark again.';
+  document.getElementById("att-emp").style.display="block";
+  document.getElementById("att-cls").value="";
+  ST.attStudents=[];ST.attClassId=null;
   loadDash();
 }
 
-// ── HISTORY ──────────────────────────────────────────────────
-async function histLoadDate(date) {
-  ST.selDate = date;
-  document.getElementById("hist-dl").textContent = date;
-  document.getElementById("hist-reload").style.display = "flex";
-  renderCal();
-
-  var sessions;
-  if (!FB_ON || typeof firebase === "undefined") {
-    sessions = DH.filter(s=>s.date===date);
-  } else {
-    var uid=ST.user?.uid, rl=ST.profile?.role;
-    var ref = firebase.firestore().collection("sessions").where("date","==",date);
-    if (rl!=="admin") ref = ref.where("teacherId","==",uid);
-    var snap = await ref.get();
-    sessions = snap.docs.map(d=>({sessionId:d.id,...d.data()}));
+// HISTORY
+async function histLoad(date) {
+  // Students always see their own records — never the teacher's session list
+  if(ST.profile?.role==="student"){
+    ST.selDate=date; renderCal();
+    await loadStudentHistory(); return;
   }
-
-  var cont = document.getElementById("hist-list");
-  if (!sessions.length) { cont.innerHTML='<div class="empty">No sessions taken on this date</div>'; return; }
-  cont.innerHTML = sessions.map(s=>{
-    var r=s.records||[];
-    var p=r.filter(x=>x.status==="present").length;
-    var a=r.filter(x=>x.status==="absent").length;
-    var l=r.filter(x=>x.status==="late").length;
-    var t=s.startTime?'🕐 '+s.startTime+(s.endTime?' – '+s.endTime:''):'';
-    return `<div class="sessc" onclick="histOpenSess('${s.sessionId}')">
-      <div class="sesst">
-        <span class="sessn">${s.className}  ·  ${s.subject||""}</span>
-        <button class="btn bo bsm" onclick="event.stopPropagation();histOpenSess('${s.sessionId}')">View / Edit</button>
-      </div>
-      <div class="sessm">
-        ${t?`<span>${t}</span>`:""}
-        <span style="color:var(--green);">✓ ${p} present</span>
-        <span style="color:var(--red);">✗ ${a} absent</span>
-        ${l?`<span style="color:var(--amber);">⏰ ${l} late</span>`:""}
-      </div>
-    </div>`;
-  }).join("");
+  ST.selDate=date;
+  document.getElementById("hist-dl").textContent=date;
+  document.getElementById("hist-rel").style.display="flex";
+  renderCal();
+  if(!FB){document.getElementById("hist-list").innerHTML='<div class="empty">Connect Firebase to view history</div>';return;}
+  try {
+    const uid=ST.user?.uid, rl=ST.profile?.role;
+    let ref=fdb().collection("sessions").where("date","==",date);
+    if(rl!=="admin")ref=ref.where("teacherId","==",uid);
+    const snap=await ref.get();
+    const sessions=snap.docs.map(d=>({sessionId:d.id,...d.data()}));
+    sessions.sort((a,b)=>(a.startTime||"").localeCompare(b.startTime||""));
+    const cont=document.getElementById("hist-list");
+    if(!sessions.length){cont.innerHTML='<div class="empty">No sessions taken on '+date+'</div>';return;}
+    // Fetch attendance counts in parallel
+    const cSnaps=await Promise.all(sessions.map(s=>fdb().collection("attendance").where("sessionId","==",s.sessionId).get().catch(()=>({docs:[]}))));
+    cont.innerHTML=sessions.map((s,i)=>{
+      const recs=cSnaps[i].docs.map(d=>d.data());
+      const p=recs.filter(r=>r.status==="present").length;
+      const a=recs.filter(r=>r.status==="absent").length;
+      const l=recs.filter(r=>r.status==="late").length;
+      const t=s.startTime?`${s.startTime}${s.endTime?" – "+s.endTime:""}`:"";
+      const canEdit=ST.profile?.role==="teacher"||ST.profile?.role==="admin";
+      return `<div class="sitem"${canEdit?` onclick="histOpenSess('${s.sessionId}')"`:""}>
+        <div class="stop"><span class="sname">${s.className||""}  ·  ${s.subject||""}</span>${canEdit?`<button class="btn bo bxs" onclick="event.stopPropagation();histOpenSess('${s.sessionId}')">View / Edit</button>`:""}</div>
+        <div class="smeta">
+          ${t?`<span style="font-size:12px;color:var(--t2);">🕐 ${t}</span>`:""}
+          <span class="chip cg2" style="font-size:11px;">✓ ${p} present</span>
+          <span class="chip cr" style="font-size:11px;">✗ ${a} absent</span>
+          ${l?`<span class="chip cam" style="font-size:11px;">⏰ ${l} late</span>`:""}
+          <span style="font-size:11px;color:var(--t3);">${recs.length} total</span>
+        </div>
+      </div>`;
+    }).join("");
+  } catch(e){document.getElementById("hist-list").innerHTML='<div class="empty">Error loading — tap ↻ to retry</div>';}
 }
-
-function histReload() { if (ST.selDate) histLoadDate(ST.selDate); }
+function histRel(){if(ST.selDate)histLoad(ST.selDate);}
 
 async function histOpenSess(sid) {
-  var sess = DH.find(s=>s.sessionId===sid);
-  if (!sess && FB_ON && typeof firebase !== "undefined") {
-    var ssnap = await firebase.firestore().collection("sessions").doc(sid).get();
-    if (!ssnap.exists) { toast("Session not found","err"); return; }
-    sess = {sessionId:sid,...ssnap.data()};
-    var rsnap = await firebase.firestore().collection("attendance").where("sessionId","==",sid).get();
-    sess.records = rsnap.docs.map(d=>({recordId:d.id,...d.data()}));
-  }
-  if (!sess) { toast("Session not found","err"); return; }
-
-  ST.editRecords = (sess.records||[]).map(r=>({...r}));
-  document.getElementById("mod-sess-t").textContent =
-    sess.className+" · "+(sess.subject||"")+" — "+sess.date+(sess.startTime?" at "+sess.startTime:"");
-  document.getElementById("mod-sess-b").innerHTML = ST.editRecords.length
-    ? ST.editRecords.map((r,i)=>`
-      <div class="sr" id="ed-${i}">
-        <div class="sav">${r.studentName.charAt(0).toUpperCase()}</div>
-        <div class="si"><div class="sn">${r.studentName}</div></div>
-        <div class="stbs">
-          <button class="stb p${r.status==="present"?" on":""}" onclick="edSt(${i},'present',this)">Present</button>
-          <button class="stb a${r.status==="absent"?" on":""}" onclick="edSt(${i},'absent',this)">Absent</button>
-          <button class="stb l${r.status==="late"?" on":""}" onclick="edSt(${i},'late',this)">Late</button>
-        </div>
-      </div>`).join("")
-    : '<div class="empty">No records for this session.</div>';
-  openMod("mod-sess");
+  if(ST.profile?.role==="student"){toast("Students cannot edit attendance","err");return;}
+  if(!FB)return;
+  try {
+    const ss=await fdb().collection("sessions").doc(sid).get();
+    if(!ss.exists){toast("Session not found","err");return;}
+    const sess={sessionId:sid,...ss.data()};
+    const rs=await fdb().collection("attendance").where("sessionId","==",sid).get();
+    ST.editRecords=rs.docs.map(d=>({recordId:d.id,...d.data()}));
+    ST.editRecords.sort((a,b)=>(a.studentName||"").localeCompare(b.studentName||""));
+    const t=sess.startTime?` · ${sess.startTime}${sess.endTime?" – "+sess.endTime:""}` :"";
+    document.getElementById("mod-sess-t").textContent=`${sess.className||""} · ${sess.subject||""} — ${sess.date||""}${t}`;
+    document.getElementById("mod-sess-b").innerHTML=ST.editRecords.length
+      ?ST.editRecords.map((r,i)=>`
+        <div class="srow" id="ed-${i}">
+          <div class="sav">${r.studentName.charAt(0).toUpperCase()}</div>
+          <div style="flex:1;min-width:0;"><div class="snm">${r.studentName}</div></div>
+          <div class="stbs">
+            <button class="stb p${r.status==="present"?" on":""}" onclick="edSt(${i},'present',this)">Present</button>
+            <button class="stb a${r.status==="absent"?" on":""}" onclick="edSt(${i},'absent',this)">Absent</button>
+            <button class="stb l${r.status==="late"?" on":""}" onclick="edSt(${i},'late',this)">Late</button>
+          </div>
+        </div>`).join("")
+      :'<div class="empty">No records for this session.</div>';
+    openMod("mod-sess");
+  } catch(e){toast("Error loading session","err");}
 }
-
-function edSt(i,status,btn) {
-  ST.editRecords[i].status = status;
-  var row = document.getElementById("ed-"+i);
-  row.querySelectorAll(".stb").forEach(b=>b.classList.remove("on"));
-  btn.classList.add("on");
-}
-
+function edSt(i,s,btn){ST.editRecords[i].status=s;document.getElementById("ed-"+i).querySelectorAll(".stb").forEach(b=>b.classList.remove("on"));btn.classList.add("on");}
 async function doSaveEdits() {
-  if (FB_ON && typeof firebase !== "undefined") {
-    var batch2 = firebase.firestore().batch();
-    for (var r of ST.editRecords) {
-      if (r.recordId) batch2.set(firebase.firestore().collection("attendance").doc(r.recordId), r);
+  if(ST.profile?.role==="student"){toast("Students cannot edit attendance","err");closeMod("mod-sess");return;}
+  if(FB&&ST.editRecords.length){
+    const batch=fdb().batch();
+    ST.editRecords.forEach(r=>{if(r.recordId)batch.set(fdb().collection("attendance").doc(r.recordId),r);});
+    await batch.commit().catch(e=>toast("Error: "+e.message,"err"));
+  }
+  closeMod("mod-sess");toast("Changes saved!");
+  if(ST.selDate)histLoad(ST.selDate);
+}
+
+// STUDENT HISTORY VIEW
+async function loadStudentHistory() {
+  if(!FB){document.getElementById("hist-list").innerHTML='<div class="empty">Connect Firebase to view attendance</div>';return;}
+  document.getElementById("hist-list").innerHTML='<div class="loading">Loading your attendance…</div>';
+  document.getElementById("hist-dl").textContent="My Records";
+  try {
+    const uid=ST.user?.uid;
+    const snap=await fdb().collection("attendance").where("studentId","==",uid).get();
+    const recs=snap.docs.map(d=>d.data());
+    recs.sort((a,b)=>b.timestamp-a.timestamp);
+    const cont=document.getElementById("hist-list");
+    if(!recs.length){cont.innerHTML='<div class="empty">No attendance records yet.<br>Your teacher will mark your attendance.</div>';return;}
+    // Group by class
+    const byClass={};
+    recs.forEach(r=>{if(!byClass[r.classId])byClass[r.classId]={className:r.className||"",records:[]};byClass[r.classId].records.push(r);});
+    cont.innerHTML=Object.values(byClass).map(g=>{
+      const total=g.records.length;
+      const present=g.records.filter(r=>r.status==="present"||r.status==="late").length;
+      const absent=g.records.filter(r=>r.status==="absent").length;
+      const pct=total?Math.round(present*100/total):0;
+      const color=pct>=75?"var(--green-bg)":pct>=50?"var(--amber-bg)":"var(--red-bg)";
+      return `<div style="padding:14px 0;border-bottom:1px solid var(--s1);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <strong style="font-family:'Google Sans',sans-serif;font-size:15px;">${g.className}</strong>
+          <span style="font-family:'Google Sans Display',sans-serif;font-size:20px;font-weight:700;color:${color};">${pct}%</span>
+        </div>
+        <div style="height:6px;background:var(--s3);border-radius:3px;overflow:hidden;margin-bottom:6px;">
+          <div style="height:100%;width:${pct}%;background:${color};border-radius:3px;transition:width.4s;"></div>
+        </div>
+        <div style="display:flex;gap:8px;font-size:12px;">
+          <span class="chip cg2">✓ ${present} present</span>
+          <span class="chip cr">✗ ${absent} absent</span>
+          <span style="color:var(--t3);">${total} total</span>
+        </div>
+      </div>`;
+    }).join("");
+  } catch(e){document.getElementById("hist-list").innerHTML='<div class="empty">Error loading attendance</div>';}
+}
+
+// SESSION DATES
+async function loadSessDates() {
+  if(!FB)return;
+  try {
+    const rl=ST.profile?.role; let ref=fdb().collection("sessions");
+    if(rl==="student"){
+      // Students: find sessions where their attendance exists
+      const aSnap=await fdb().collection("attendance").where("studentId","==",ST.user.uid).get().catch(()=>({docs:[]}));
+      ST.sessionDates=new Set(aSnap.docs.map(d=>d.data().date).filter(Boolean));
+    } else if(rl!=="admin"){
+      ref=ref.where("teacherId","==",ST.user.uid);
+      const s=await ref.get();
+      ST.sessionDates=new Set(s.docs.map(d=>d.data().date).filter(Boolean));
+    } else {
+      const s=await ref.get();
+      ST.sessionDates=new Set(s.docs.map(d=>d.data().date).filter(Boolean));
     }
-    await batch2.commit();
-  }
-  // update demo cache too
-  var sess = DH.find(s=>s.records&&s.records.some(r=>r.studentId===ST.editRecords[0]?.studentId&&s.sessionId===ST.editRecords[0]?.sessionId?.slice(0,8)));
-  if (!sess) sess = DH.find(s=>s.records&&s.records.length===ST.editRecords.length);
-  if (sess) sess.records = ST.editRecords;
-  closeMod("mod-sess");
-  toast("Changes saved!");
-  if (ST.selDate) histLoadDate(ST.selDate);
+  } catch(e){ST.sessionDates=new Set();}
 }
 
-// ── CALENDAR ─────────────────────────────────────────────────
-function calPrev() { ST.calM--; if(ST.calM<0){ST.calM=11;ST.calY--;} renderCal(); }
-function calNext() { ST.calM++; if(ST.calM>11){ST.calM=0;ST.calY++;} renderCal(); }
-
+// CALENDAR
+function calPrev(){ST.calM--;if(ST.calM<0){ST.calM=11;ST.calY--;}renderCal();}
+function calNext(){ST.calM++;if(ST.calM>11){ST.calM=0;ST.calY++;}renderCal();}
 function renderCal() {
-  var MN=["January","February","March","April","May","June","July","August","September","October","November","December"];
-  document.getElementById("cal-lbl").textContent = MN[ST.calM]+" "+ST.calY;
-  var fd = new Date(ST.calY,ST.calM,1).getDay();
-  var dm = new Date(ST.calY,ST.calM+1,0).getDate();
-  var now = new Date();
-  var sd = new Set(DH.map(s=>s.date));
-  var h = "";
-  for(var i=0;i<fd;i++) h+='<div class="cd emp"></div>';
-  for(var d=1;d<=dm;d++){
-    var ds = ST.calY+"-"+String(ST.calM+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");
-    var it = d===now.getDate()&&ST.calM===now.getMonth()&&ST.calY===now.getFullYear();
-    var is = ds===ST.selDate;
-    var ih = sd.has(ds);
-    h+='<button class="cd'+(it?" today":"")+(is?" sel":"")+(ih?" has":"")+'" onclick="histLoadDate(\''+ds+'\')">'+d+'</button>';
+  const MN=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  document.getElementById("cal-lbl").textContent=`${MN[ST.calM]} ${ST.calY}`;
+  const fd=new Date(ST.calY,ST.calM,1).getDay(), dm=new Date(ST.calY,ST.calM+1,0).getDate(), now=new Date();
+  let h="";
+  for(let i=0;i<fd;i++)h+='<button class="cd emp" disabled></button>';
+  for(let d=1;d<=dm;d++){
+    const ds=`${ST.calY}-${String(ST.calM+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const it=d===now.getDate()&&ST.calM===now.getMonth()&&ST.calY===now.getFullYear();
+    const is=ds===ST.selDate, ih=ST.sessionDates.has(ds);
+    h+=`<button class="cd${it?" today":""}${is?" sel":""}${ih?" has":""}" onclick="histLoad('${ds}')">${d}</button>`;
   }
-  document.getElementById("cal-days").innerHTML = h;
+  document.getElementById("cal-days").innerHTML=h;
 }
 
-// ── DASHBOARD ────────────────────────────────────────────────
-function loadDash() {
-  var ts = DH.filter(s=>s.date===TODAY);
-  var ar = ts.flatMap(s=>s.records||[]);
-  document.getElementById("s-td").textContent = ts.length;
-  document.getElementById("s-pr").textContent = ar.filter(r=>r.status==="present").length;
-  document.getElementById("s-ab").textContent = ar.filter(r=>r.status==="absent").length;
-  var el = document.getElementById("dash-recent");
-  if (!DH.length) { el.innerHTML='<div class="empty">No sessions yet</div>'; return; }
-  el.innerHTML = DH.slice(0,6).map(s=>{
-    var r=s.records||[];
-    var p=r.filter(x=>x.status==="present").length;
-    var a=r.filter(x=>x.status==="absent").length;
-    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--s3);">
-      <div>
-        <div style="font-size:14px;font-weight:500;">${s.className}  ·  ${s.subject||""}</div>
-        <div style="font-size:11px;color:var(--t3);">${s.date}${s.startTime?" · "+s.startTime:""}</div>
-      </div>
-      <div style="display:flex;gap:6px;">
-        <span class="chip cp">✓${p}</span>
-        <span class="chip ca">✗${a}</span>
-      </div>
-    </div>`;
-  }).join("") + (DH.length>6?'<div style="padding:10px 0 0;text-align:center;"><button class="btn bt bsm" onclick="showView(\'hist\')">View all →</button></div>':"");
+// DASHBOARD
+async function loadDash() {
+  const rl=ST.profile?.role;
+  const isStudent=rl==="student";
+  // Show/hide correct panels
+  document.getElementById("dash-teacher-stats").style.display=isStudent?"none":"grid";
+  document.getElementById("dash-student-stats").style.display=isStudent?"grid":"none";
+  document.getElementById("dash-teacher-actions").style.display=isStudent?"none":"grid";
+  document.getElementById("dash-student-actions").style.display=isStudent?"grid":"none";
+
+  if(isStudent){
+    await loadStudentDash();
+  } else {
+    await loadTeacherDash();
+  }
 }
 
-// ── NOTIFICATIONS ────────────────────────────────────────────
-async function loadNotifs() {
-  var el = document.getElementById("notif-list");
-  el.innerHTML = '<div class="loading">Loading…</div>';
-  if (!FB_ON || typeof firebase === "undefined") {
-    el.innerHTML = '<div class="empty">Connect Firebase to see notifications</div>';
+async function loadStudentDash() {
+  if(!FB){
+    ["s-cls-st","s-pct-st","s-td-st","s-ab-st"].forEach(id=>document.getElementById(id).textContent="0");
+    document.getElementById("dash-student-summary").innerHTML='<div class="empty">Connect Firebase to see your data</div>';
     return;
   }
-  var uid = ST.user?.uid;
   try {
-    var [p1,p2] = await Promise.all([
-      firebase.firestore().collection("notifications").where("targetUserId","==",uid).get(),
-      firebase.firestore().collection("notifications").where("targetUserId","==","broadcast").get(),
+    const uid=ST.user?.uid;
+    const snap=await fdb().collection("attendance").where("studentId","==",uid).get();
+    const recs=snap.docs.map(d=>d.data());
+    // Count enrolled classes
+    const classIds=new Set(recs.map(r=>r.classId).filter(Boolean));
+    document.getElementById("s-cls-st").textContent=classIds.size;
+    // Overall attendance %
+    const total=recs.length, present=recs.filter(r=>r.status==="present"||r.status==="late").length;
+    const pct=total?Math.round(present*100/total):0;
+    document.getElementById("s-pct-st").textContent=total?pct+"%":"—";
+    // Today
+    const todayRecs=recs.filter(r=>r.date===TODAY);
+    document.getElementById("s-td-st").textContent=todayRecs.length;
+    document.getElementById("s-ab-st").textContent=todayRecs.filter(r=>r.status==="absent").length;
+    // Summary card — show per-class breakdown
+    const byClass={};
+    recs.forEach(r=>{if(!byClass[r.classId])byClass[r.classId]={className:r.className||r.classId,records:[]};byClass[r.classId].records.push(r);});
+    const el=document.getElementById("dash-student-summary");
+    if(!Object.keys(byClass).length){el.innerHTML='<div class="empty">No attendance records yet.<br>Your teacher will mark your attendance.</div>';return;}
+    el.innerHTML=Object.values(byClass).slice(0,4).map(g=>{
+      const t=g.records.length, p=g.records.filter(r=>r.status==="present"||r.status==="late").length;
+      const pc=t?Math.round(p*100/t):0;
+      const color=pc>=75?"var(--green-bg)":pc>=50?"var(--amber-bg)":"var(--red-bg)";
+      return `<div style="padding:11px 0;border-bottom:1px solid var(--s1);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <span style="font-family:'Google Sans',sans-serif;font-size:14px;font-weight:500;">${g.className}</span>
+          <span style="font-family:'Google Sans Display',sans-serif;font-size:18px;font-weight:700;color:${color};">${pc}%</span>
+        </div>
+        <div style="height:5px;background:var(--s3);border-radius:3px;overflow:hidden;">
+          <div style="height:100%;width:${pc}%;background:${color};border-radius:3px;"></div>
+        </div>
+      </div>`;
+    }).join("")+(Object.keys(byClass).length>4?'<div style="text-align:center;padding-top:10px;"><button class="btn bt bsm" onclick="gv(\'hist\')">View all →</button></div>':"");
+  } catch(e){document.getElementById("dash-student-summary").innerHTML='<div class="empty">Error loading dashboard</div>';}
+}
+
+async function loadTeacherDash() {
+  if(!FB){
+    ["s-td","s-pr","s-ab"].forEach(id=>document.getElementById(id).textContent="0");
+    document.getElementById("dash-recent").innerHTML='<div class="empty">Connect Firebase to see your data</div>';
+    return;
+  }
+  try {
+    const uid=ST.user?.uid,rl=ST.profile?.role;
+    let tRef=fdb().collection("sessions").where("date","==",TODAY);
+    if(rl!=="admin")tRef=tRef.where("teacherId","==",uid);
+    const tSnap=await tRef.get(); document.getElementById("s-td").textContent=tSnap.size;
+    let aRef=fdb().collection("attendance").where("date","==",TODAY);
+    if(rl!=="admin")aRef=aRef.where("markedBy","==",uid);
+    const aSnap=await aRef.get().catch(()=>({docs:[]}));
+    const recs=aSnap.docs.map(d=>d.data());
+    document.getElementById("s-pr").textContent=recs.filter(r=>r.status==="present").length;
+    document.getElementById("s-ab").textContent=recs.filter(r=>r.status==="absent").length;
+    let rRef=fdb().collection("sessions");
+    if(rl!=="admin")rRef=rRef.where("teacherId","==",uid);
+    const rSnap=await rRef.get();
+    const recent=rSnap.docs.map(d=>({sessionId:d.id,...d.data()}));
+    recent.sort((a,b)=>{const da=a.date||"",db2=b.date||"";return da!==db2?db2.localeCompare(da):(b.startTime||"").localeCompare(a.startTime||"");});
+    const el=document.getElementById("dash-recent");
+    if(!recent.length){el.innerHTML='<div class="empty">No sessions yet. Mark your first attendance!</div>';return;}
+    el.innerHTML=recent.slice(0,6).map(s=>`
+      <div class="rrow">
+        <div><div style="font-size:14px;font-weight:500;">${s.className||""}  ·  ${s.subject||""}</div><div style="font-size:12px;color:var(--t3);">${s.date||""}${s.startTime?" · "+s.startTime:""}</div></div>
+        <div class="chip cgr" style="font-size:12px;">${s.startTime||"—"}</div>
+      </div>`).join("")
+    +(recent.length>6?'<div style="padding:10px 0 0;text-align:center;"><button class="btn bt bsm" onclick="gv(\'hist\')">View all →</button></div>':"");
+  } catch(e){document.getElementById("dash-recent").innerHTML='<div class="empty">Error loading dashboard</div>';}
+}
+
+// NOTIFICATIONS
+async function loadNotifs() {
+  const el=document.getElementById("notif-list"); el.innerHTML='<div class="loading">Loading…</div>';
+  if(!FB){el.innerHTML='<div class="empty">Connect Firebase to see notifications</div>';return;}
+  try {
+    const uid=ST.user?.uid;
+    const [p1,p2]=await Promise.all([
+      fdb().collection("notifications").where("targetUserId","==",uid).get(),
+      fdb().collection("notifications").where("targetUserId","==","broadcast").get(),
     ]);
-    var list = [...p1.docs,...p2.docs].map(d=>d.data());
+    const list=[...p1.docs,...p2.docs].map(d=>d.data());
     list.sort((a,b)=>b.timestamp-a.timestamp);
-    if (!list.length) { el.innerHTML='<div class="empty">No notifications yet</div>'; return; }
-    el.innerHTML = list.map(n=>`
-      <div class="nrow">
-        <div class="ntit">${n.title||""}</div>
-        <div class="nmsg">${n.message||""}</div>
-        <div class="nts">${n.timestamp ? new Date(n.timestamp).toLocaleString("en-IN") : ""}</div>
-      </div>`).join("");
-  } catch(e) {
-    el.innerHTML = '<div class="empty">Could not load — tap ↻ to retry</div>';
-  }
+    if(!list.length){el.innerHTML='<div class="empty">No notifications yet</div>';return;}
+    el.innerHTML=list.map(n=>`<div style="padding:13px 0;border-bottom:1px solid var(--s1);"><div style="font-size:14px;font-weight:500;margin-bottom:3px;">${n.title||""}</div><div style="font-size:13px;color:var(--t2);">${n.message||""}</div><div style="font-size:11px;color:var(--t3);margin-top:4px;">${n.timestamp?new Date(n.timestamp).toLocaleString("en-IN"):""}</div></div>`).join("");
+  } catch(e){el.innerHTML='<div class="empty">Error loading — tap ↻ to retry</div>';}
 }
-
-// notification name search
-document.getElementById("notif-to").addEventListener("input", function() {
-  var q = this.value.trim().toLowerCase();
-  ST.resolvedNotifUid = null;
-  var me = document.getElementById("notif-match");
-  if (!q) { me.style.display="none"; return; }
-  var match = ST.allStudents.find(s=>s.name&&s.name.toLowerCase().includes(q));
-  if (match) {
-    ST.resolvedNotifUid = match.uid;
-    me.textContent = "✓ Matched: "+match.name;
-    me.style.display = "block";
-  } else {
-    me.textContent = "No match — will send to all students";
-    me.style.display = "block";
-  }
+document.getElementById("notif-to").addEventListener("input",function(){
+  const q=this.value.trim().toLowerCase(); ST.resolvedNotifUid=null;
+  const me=document.getElementById("notif-match");
+  if(!q){me.style.display="none";return;}
+  const m=ST.allStudents.find(s=>s.name&&s.name.toLowerCase().includes(q));
+  if(m){ST.resolvedNotifUid=m.uid;me.textContent="✓ Matched: "+m.name;me.style.display="block";}
+  else{me.textContent="No match — will send to all";me.style.display="block";}
 });
-
 async function doSendNotif() {
-  var title = document.getElementById("notif-title").value.trim();
-  var msg   = document.getElementById("notif-msg").value.trim();
-  if (!title||!msg) { toast("Fill title and message","err"); return; }
-  if (!FB_ON || typeof firebase === "undefined") { toast("Connect Firebase to send notifications","err"); return; }
-  var nref = firebase.firestore().collection("notifications").doc();
-  await nref.set({
-    notificationId:nref.id, title, message:msg,
-    targetUserId: ST.resolvedNotifUid || "broadcast",
-    type:"announcement", timestamp:Date.now(), read:false,
-  });
-  ["notif-title","notif-msg","notif-to"].forEach(id=>document.getElementById(id).value="");
-  document.getElementById("notif-match").style.display="none";
-  ST.resolvedNotifUid = null;
-  toast("Notification sent!");
-  loadNotifs();
+  const t=document.getElementById("notif-ttl").value.trim(), m=document.getElementById("notif-msg").value.trim();
+  if(!t||!m){toast("Fill title and message","err");return;}
+  if(!FB){toast("Connect Firebase","err");return;}
+  const r=fdb().collection("notifications").doc();
+  await r.set({notificationId:r.id,title:t,message:m,targetUserId:ST.resolvedNotifUid||"broadcast",type:"announcement",timestamp:Date.now(),read:false});
+  ["notif-ttl","notif-msg","notif-to"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("notif-match").style.display="none"; ST.resolvedNotifUid=null;
+  toast("Notification sent!"); loadNotifs();
 }
 
-// ── CHANGE PASSWORD ──────────────────────────────────────────
+// CHANGE PASSWORD
 async function doChangePw() {
-  var c = document.getElementById("pw-c").value;
-  var n = document.getElementById("pw-n").value;
-  var f = document.getElementById("pw-f").value;
-  if (!c) { toast("Enter current password","err"); return; }
-  if (n.length<6) { toast("New password: minimum 6 characters","err"); return; }
-  if (n!==f) { toast("Passwords do not match","err"); return; }
-  if (n===c) { toast("New password must be different","err"); return; }
-  if (!FB_ON || typeof firebase === "undefined") { toast("Connect Firebase to change password","err"); return; }
+  const c=document.getElementById("pw-c").value, n=document.getElementById("pw-n").value, f=document.getElementById("pw-f").value;
+  if(!c){toast("Enter current password","err");return;}
+  if(n.length<6){toast("Minimum 6 characters","err");return;}
+  if(n!==f){toast("Passwords do not match","err");return;}
+  if(n===c){toast("New password must be different","err");return;}
+  if(!FB){toast("Connect Firebase","err");return;}
   try {
-    var user = firebase.auth().currentUser;
-    var cred = firebase.auth.EmailAuthProvider.credential(user.email, c);
-    await user.reauthenticateWithCredential(cred);
-    await user.updatePassword(n);
+    const u=fauth().currentUser;
+    const cr=firebase.auth.EmailAuthProvider.credential(u.email,c);
+    await u.reauthenticateWithCredential(cr); await u.updatePassword(n);
     ["pw-c","pw-n","pw-f"].forEach(id=>document.getElementById(id).value="");
-    toast("Password updated successfully!");
-  } catch(e) {
-    if (e.code==="auth/wrong-password"||e.code==="auth/invalid-credential")
-      toast("Current password is incorrect","err");
-    else toast(e.message||"Failed","err");
-  }
+    toast("Password updated!");
+  } catch(e){toast(["auth/wrong-password","auth/invalid-credential"].includes(e.code)?"Current password is incorrect":e.message,"err");}
 }
 
-// ── UI HELPERS ───────────────────────────────────────────────
-function showPage(id) {
-  document.querySelectorAll(".pg").forEach(p=>p.classList.remove("on"));
-  document.getElementById(id).classList.add("on");
-}
-
-var VIEW_TITLES = {dash:"Dashboard",mark:"Mark Attendance",hist:"Attendance History",cls:"Classes",notif:"Notifications",pw:"Change Password",setup:"Firebase Setup"};
-
-function showView(id) {
+// UI HELPERS
+function showPage(id){document.querySelectorAll(".pg").forEach(p=>p.classList.remove("on"));document.getElementById(id).classList.add("on");}
+function gv(id){
   document.querySelectorAll(".vw").forEach(v=>v.classList.remove("on"));
   document.querySelectorAll(".ni").forEach(n=>n.classList.remove("on"));
-  var v = document.getElementById("vw-"+id); if(v) v.classList.add("on");
-  var n = document.getElementById("ni-"+id); if(n) n.classList.add("on");
-  document.getElementById("tb-title").textContent = VIEW_TITLES[id]||"";
+  const v=document.getElementById("vw-"+id); if(v)v.classList.add("on");
+  const n=document.getElementById("ni-"+id); if(n)n.classList.add("on");
+  document.getElementById("tb-ttl").textContent=VTITLES[id]||"";
 }
-
-function openMod(id)  { document.getElementById(id).classList.add("on"); }
-function closeMod(id) { document.getElementById(id).classList.remove("on"); }
-
-function toast(msg, type) {
-  var t = document.getElementById("toast");
-  t.textContent = msg;
-  t.className = "toast "+(type||"ok")+" show";
-  clearTimeout(t._t);
-  t._t = setTimeout(()=>t.classList.remove("show"), 3500);
+function openMod(id){document.getElementById(id).classList.add("on");}
+function closeMod(id){document.getElementById(id).classList.remove("on");}
+function toast(msg,type){
+  const t=document.getElementById("toast"); t.textContent=msg;
+  t.className="toast "+(type||"ok")+" on"; clearTimeout(t._t);
+  t._t=setTimeout(()=>t.classList.remove("on"),3800);
 }
-
-// ── EXPOSE TO onclick ────────────────────────────────────────
-// Initialize Firebase auth listener (auto-login on page refresh)
-initFirebaseListeners();
-
-window.switchTab     = switchTab;
-window.doLogin       = doLogin;
-window.doRegister    = doRegister;
-window.demoMode      = demoMode;
-window.doLogout      = doLogout;
-window.showView      = showView;
-window.openMod       = openMod;
-window.closeMod      = closeMod;
-window.doAddCls      = doAddCls;
-window.doRmCls       = doRmCls;
-window.attLoadStudents = attLoadStudents;
-window.attSetSt      = attSetSt;
-window.attMarkAll    = attMarkAll;
-window.attSubmit     = attSubmit;
-window.histLoadDate  = histLoadDate;
-window.histReload    = histReload;
-window.histOpenSess  = histOpenSess;
-window.edSt          = edSt;
-window.doSaveEdits   = doSaveEdits;
-window.calPrev       = calPrev;
-window.calNext       = calNext;
-window.loadNotifs    = loadNotifs;
-window.doSendNotif   = doSendNotif;
-window.doChangePw    = doChangePw;
+document.getElementById("li-pw").addEventListener("keydown",e=>{if(e.key==="Enter")doLogin();});
+document.getElementById("li-em").addEventListener("keydown",e=>{if(e.key==="Enter")doLogin();});
 </script>
 </body>
 </html>
