@@ -209,6 +209,10 @@ code{background:var(--s3);padding:1px 6px;border-radius:4px;font-family:monospac
 @media(max-width:900px){.sg{grid-template-columns:1fr 1fr;}.g2{grid-template-columns:1fr;}}
 @media(max-width:640px){.sb{display:none;}.vw{padding:16px;}.sg{grid-template-columns:1fr 1fr;}}
 </style>
+<!-- Firebase Compat SDK — synchronous load, no ES modules, no race conditions -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -612,7 +616,12 @@ var firebaseConfig = {
 
 var FB_ON = firebaseConfig.apiKey !== "YOUR_API_KEY";
 
-// Firebase SDK references (filled after dynamic load)
+// Initialize Firebase app using compat SDK (already loaded via <script> tags above)
+if (FB_ON && typeof firebase !== "undefined") {
+  firebase.initializeApp(firebaseConfig);
+}
+
+// References (set on first use by getSDK())
 var _auth = null, _db = null, _sdk = {};
 
 // ── APP STATE ────────────────────────────────────────────────
@@ -655,37 +664,33 @@ DH.push(
    records:[{studentId:"s6",studentName:"Aksh Bhagat",status:"present"},{studentId:"s7",studentName:"Akshay Naphade",status:"absent"}]}
 );
 
-// ── LOAD FIREBASE SDK ────────────────────────────────────────
-function loadFirebaseSDK() {
-  if (!FB_ON) return;
-  var s = document.createElement("script");
-  s.type = "module";
-  s.textContent = [
-    'import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";',
-    'import{getAuth,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,onAuthStateChanged,EmailAuthProvider,reauthenticateWithCredential,updatePassword}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";',
-    'import{getFirestore,doc,setDoc,getDoc,addDoc,collection,query,where,getDocs,deleteDoc,serverTimestamp,arrayUnion,increment}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";',
-    'var app=initializeApp('+JSON.stringify(firebaseConfig)+');',
-    'window._auth=getAuth(app);window._db=getFirestore(app);',
-    'window._sdk={signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,onAuthStateChanged,EmailAuthProvider,reauthenticateWithCredential,updatePassword,doc,setDoc,getDoc,addDoc,collection,query,where,getDocs,deleteDoc,serverTimestamp,arrayUnion,increment};',
-    // Auto-login on refresh
-    'onAuthStateChanged(window._auth,async function(u){',
-    '  if(u&&!window._didAutoLogin){window._didAutoLogin=true;',
-    '    window._auth=window._auth;window._db=window._db;Object.assign(window._sdk,window._sdk||{});',
-    '    var snap=await window._sdk.getDoc(window._sdk.doc(window._db,"users",u.uid));',
-    '    ST.user=u;ST.profile=snap.exists()?snap.data():{name:u.email,role:"teacher"};',
-    '    enterApp();',
-    '  }',
-    '});',
-  ].join("");
-  document.head.appendChild(s);
-}
-loadFirebaseSDK();
-
+// ── FIREBASE COMPAT SDK (loaded via <script> tags in <head>, synchronous) ──
+// Uses firebase compat layer — no ES modules, no race conditions, all global
 function getSDK() {
-  _auth = window._auth || _auth;
-  _db   = window._db   || _db;
-  if (window._sdk) Object.assign(_sdk, window._sdk);
-  return { auth:_auth, db:_db, sdk:_sdk };
+  // compat SDK exposes firebase.auth(), firebase.firestore() globally
+  if (FB_ON && typeof firebase !== "undefined") {
+    if (!_auth) _auth = firebase.auth();
+    if (!_db)   _db   = firebase.firestore();
+  }
+  return { auth: _auth, db: _db };
+}
+
+// Auto-login on page refresh (fires after compat SDK scripts load)
+function initFirebaseListeners() {
+  if (!FB_ON || typeof firebase === "undefined") return;
+  _auth = firebase.auth();
+  _db   = firebase.firestore();
+  firebase.auth().onAuthStateChanged(async function(u) {
+    if (u && !window._didAutoLogin) {
+      window._didAutoLogin = true;
+      ST.user = u;
+      try {
+        var snap = await firebase.firestore().collection("users").doc(u.uid).get();
+        ST.profile = snap.exists ? snap.data() : { name: u.email, role:"teacher" };
+      } catch(e) { ST.profile = { name: u.email, role:"teacher" }; }
+      enterApp();
+    }
+  });
 }
 
 // ── AUTH FUNCTIONS ───────────────────────────────────────────
@@ -701,21 +706,11 @@ async function doLogin() {
   var pw = document.getElementById("li-pw").value;
   if (!em || !pw) { toast("Enter email and password","err"); return; }
   if (!FB_ON) { demoMode(); return; }
-  // If SDK not loaded yet, wait up to 5s then retry
-  if (!window._auth || !window._sdk) {
-    toast("Connecting to Firebase…","ok");
-    await new Promise(r => setTimeout(r, 1500));
-    if (!window._auth) { toast("Firebase not ready — try again in a moment","err"); return; }
-  }
-  var {auth,db,sdk} = getSDK();
-  if (!auth || !sdk.signInWithEmailAndPassword) {
-    toast("Firebase not ready — try again in 2 seconds","err"); return;
-  }
   try {
-    var cred = await sdk.signInWithEmailAndPassword(auth, em, pw);
-    var snap = await sdk.getDoc(sdk.doc(db,"users",cred.user.uid));
+    var cred = await firebase.auth().signInWithEmailAndPassword(em, pw);
+    var snap = await firebase.firestore().collection("users").doc(cred.user.uid).get();
     ST.user    = cred.user;
-    ST.profile = snap.exists() ? snap.data() : {name:em, role:"teacher"};
+    ST.profile = snap.exists ? snap.data() : {name:em, role:"teacher"};
     enterApp();
   } catch(e) {
     if (e.code==="auth/invalid-credential"||e.code==="auth/user-not-found"||e.code==="auth/wrong-password")
@@ -732,19 +727,10 @@ async function doRegister() {
   if (!nm||!em||!pw) { toast("Please fill all fields","err"); return; }
   if (pw.length < 6) { toast("Password must be at least 6 characters","err"); return; }
   if (!FB_ON) { ST.user={uid:"demo",email:em}; ST.profile={name:nm,role:rl}; enterApp(); return; }
-  if (!window._auth || !window._sdk) {
-    toast("Connecting to Firebase…","ok");
-    await new Promise(r => setTimeout(r, 1500));
-    if (!window._auth) { toast("Firebase not ready — try again","err"); return; }
-  }
-  var {auth,db,sdk} = getSDK();
-  if (!auth || !sdk.createUserWithEmailAndPassword) {
-    toast("Firebase not ready — try again","err"); return;
-  }
   try {
-    var cred = await sdk.createUserWithEmailAndPassword(auth, em, pw);
-    var p = {uid:cred.user.uid,name:nm,email:em,role:rl,createdAt:sdk.serverTimestamp()};
-    await sdk.setDoc(sdk.doc(db,"users",cred.user.uid), p);
+    var cred = await firebase.auth().createUserWithEmailAndPassword(em, pw);
+    var p = {uid:cred.user.uid,name:nm,email:em,role:rl,createdAt:firebase.firestore.FieldValue.serverTimestamp()};
+    await firebase.firestore().collection("users").doc(cred.user.uid).set(p);
     ST.user = cred.user; ST.profile = p;
     enterApp();
     toast("Account created! Welcome to AttendEase");
@@ -762,7 +748,7 @@ async function demoMode() {
 }
 
 async function doLogout() {
-  if (FB_ON && window._auth) { var {auth,sdk} = getSDK(); await sdk.signOut(auth).catch(()=>{}); }
+  if (FB_ON && typeof firebase !== "undefined") { await firebase.auth().signOut().catch(()=>{}); }
   ST.user=null; ST.profile=null; window._didAutoLogin=false;
   showPage("pg-login");
 }
@@ -793,14 +779,11 @@ async function enterApp() {
 
 // ── CLASSES ──────────────────────────────────────────────────
 async function loadClasses() {
-  if (!FB_ON) { ST.classes = DC.slice(); return; }
-  var {db,sdk} = getSDK();
-  if (!db) { ST.classes = DC.slice(); return; }
+  if (!FB_ON || typeof firebase === "undefined") { ST.classes = DC.slice(); return; }
   var rl = ST.profile?.role;
-  var q = rl==="admin"
-    ? sdk.collection(db,"classes")
-    : sdk.query(sdk.collection(db,"classes"), sdk.where("teacherId","==",ST.user.uid));
-  var snap = await sdk.getDocs(q);
+  var ref = firebase.firestore().collection("classes");
+  var q = rl==="admin" ? ref : ref.where("teacherId","==",ST.user.uid);
+  var snap = await q.get();
   ST.classes = snap.docs.map(d => ({classId:d.id,...d.data()}));
 }
 
@@ -830,11 +813,10 @@ async function doAddCls() {
   var rm = document.getElementById("nc-rm").value.trim();
   if (!nm||!sb) { toast("Enter class name and subject","err"); return; }
   var nc = {className:nm,subject:sb,room:rm,teacherId:ST.user?.uid||"demo",teacherName:ST.profile?.name||"Teacher",studentCount:0};
-  if (!FB_ON || !window._db) {
+  if (!FB_ON || typeof firebase === "undefined") {
     nc.classId = "c"+Date.now(); ST.classes.push(nc);
   } else {
-    var {db,sdk} = getSDK();
-    var ref = await sdk.addDoc(sdk.collection(db,"classes"),{...nc,createdAt:sdk.serverTimestamp()});
+    var ref = await firebase.firestore().collection("classes").add({...nc,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
     nc.classId = ref.id; ST.classes.push(nc);
   }
   renderClasses(); fillClassSel();
@@ -845,7 +827,7 @@ async function doAddCls() {
 
 async function doRmCls(id) {
   if (!confirm("Delete this class?")) return;
-  if (FB_ON && window._db) { var {db,sdk}=getSDK(); await sdk.deleteDoc(sdk.doc(db,"classes",id)); }
+  if (FB_ON && typeof firebase !== "undefined") { await firebase.firestore().collection("classes").doc(id).delete(); }
   ST.classes = ST.classes.filter(c=>c.classId!==id);
   renderClasses(); fillClassSel();
   toast("Class removed");
@@ -856,12 +838,10 @@ async function attLoadStudents() {
   var cid = document.getElementById("att-cls").value;
   if (!cid) { toast("Select a class first","err"); return; }
   var students;
-  if (!FB_ON || !window._db) {
+  if (!FB_ON || typeof firebase === "undefined") {
     students = DS[cid] || [];
   } else {
-    var {db,sdk} = getSDK();
-    var q = sdk.query(sdk.collection(db,"users"),sdk.where("classIds","array-contains",cid));
-    var snap = await sdk.getDocs(q);
+    var snap = await firebase.firestore().collection("users").where("classIds","array-contains",cid).get();
     students = snap.docs.map(d=>({uid:d.id,...d.data()}));
   }
   ST.attStudents = students.map(s=>({...s,status:"present"}));
@@ -914,15 +894,18 @@ async function attSubmit() {
     sessionId:sessId,markedBy:ST.user?.uid||"demo",timestamp:Date.now(),
   }));
 
-  if (FB_ON && window._db) {
-    var {db,sdk} = getSDK();
+  if (FB_ON && typeof firebase !== "undefined") {
+    var batch = firebase.firestore().batch();
     for (var r of recs) {
       var did = r.studentId+"_"+ST.attClassId+"_"+sessId;
-      await sdk.setDoc(sdk.doc(db,"attendance",did),{...r,recordId:did});
+      var rr = {...r,recordId:did};
+      batch.set(firebase.firestore().collection("attendance").doc(did), rr);
     }
-    await sdk.setDoc(sdk.doc(db,"sessions",sessId),{
+    await batch.commit();
+    await firebase.firestore().collection("sessions").doc(sessId).set({
       sessionId:sessId,classId:ST.attClassId,className:cls.className,subject:cls.subject,
-      teacherId:ST.user?.uid,date,startTime:"",endTime:"",createdAt:sdk.serverTimestamp(),
+      teacherId:ST.user?.uid,date,startTime:"",endTime:"",
+      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
     });
   }
   // always update demo data so history shows it
@@ -943,15 +926,13 @@ async function histLoadDate(date) {
   renderCal();
 
   var sessions;
-  if (!FB_ON || !window._db) {
+  if (!FB_ON || typeof firebase === "undefined") {
     sessions = DH.filter(s=>s.date===date);
   } else {
-    var {db,sdk} = getSDK();
     var uid=ST.user?.uid, rl=ST.profile?.role;
-    var q = rl==="admin"
-      ? sdk.query(sdk.collection(db,"sessions"),sdk.where("date","==",date))
-      : sdk.query(sdk.collection(db,"sessions"),sdk.where("date","==",date),sdk.where("teacherId","==",uid));
-    var snap = await sdk.getDocs(q);
+    var ref = firebase.firestore().collection("sessions").where("date","==",date);
+    if (rl!=="admin") ref = ref.where("teacherId","==",uid);
+    var snap = await ref.get();
     sessions = snap.docs.map(d=>({sessionId:d.id,...d.data()}));
   }
 
@@ -982,13 +963,11 @@ function histReload() { if (ST.selDate) histLoadDate(ST.selDate); }
 
 async function histOpenSess(sid) {
   var sess = DH.find(s=>s.sessionId===sid);
-  if (!sess && FB_ON && window._db) {
-    var {db,sdk} = getSDK();
-    var ssnap = await sdk.getDoc(sdk.doc(db,"sessions",sid));
-    if (!ssnap.exists()) { toast("Session not found","err"); return; }
+  if (!sess && FB_ON && typeof firebase !== "undefined") {
+    var ssnap = await firebase.firestore().collection("sessions").doc(sid).get();
+    if (!ssnap.exists) { toast("Session not found","err"); return; }
     sess = {sessionId:sid,...ssnap.data()};
-    var q = sdk.query(sdk.collection(db,"attendance"),sdk.where("sessionId","==",sid));
-    var rsnap = await sdk.getDocs(q);
+    var rsnap = await firebase.firestore().collection("attendance").where("sessionId","==",sid).get();
     sess.records = rsnap.docs.map(d=>({recordId:d.id,...d.data()}));
   }
   if (!sess) { toast("Session not found","err"); return; }
@@ -1019,11 +998,12 @@ function edSt(i,status,btn) {
 }
 
 async function doSaveEdits() {
-  if (FB_ON && window._db) {
-    var {db,sdk} = getSDK();
+  if (FB_ON && typeof firebase !== "undefined") {
+    var batch2 = firebase.firestore().batch();
     for (var r of ST.editRecords) {
-      if (r.recordId) await sdk.setDoc(sdk.doc(db,"attendance",r.recordId),r);
+      if (r.recordId) batch2.set(firebase.firestore().collection("attendance").doc(r.recordId), r);
     }
+    await batch2.commit();
   }
   // update demo cache too
   var sess = DH.find(s=>s.records&&s.records.some(r=>r.studentId===ST.editRecords[0]?.studentId&&s.sessionId===ST.editRecords[0]?.sessionId?.slice(0,8)));
@@ -1087,16 +1067,15 @@ function loadDash() {
 async function loadNotifs() {
   var el = document.getElementById("notif-list");
   el.innerHTML = '<div class="loading">Loading…</div>';
-  if (!FB_ON || !window._db) {
+  if (!FB_ON || typeof firebase === "undefined") {
     el.innerHTML = '<div class="empty">Connect Firebase to see notifications</div>';
     return;
   }
-  var {db,sdk} = getSDK();
   var uid = ST.user?.uid;
   try {
     var [p1,p2] = await Promise.all([
-      sdk.getDocs(sdk.query(sdk.collection(db,"notifications"),sdk.where("targetUserId","==",uid))),
-      sdk.getDocs(sdk.query(sdk.collection(db,"notifications"),sdk.where("targetUserId","==","broadcast"))),
+      firebase.firestore().collection("notifications").where("targetUserId","==",uid).get(),
+      firebase.firestore().collection("notifications").where("targetUserId","==","broadcast").get(),
     ]);
     var list = [...p1.docs,...p2.docs].map(d=>d.data());
     list.sort((a,b)=>b.timestamp-a.timestamp);
@@ -1133,11 +1112,10 @@ async function doSendNotif() {
   var title = document.getElementById("notif-title").value.trim();
   var msg   = document.getElementById("notif-msg").value.trim();
   if (!title||!msg) { toast("Fill title and message","err"); return; }
-  if (!FB_ON || !window._db) { toast("Connect Firebase to send notifications","err"); return; }
-  var {db,sdk} = getSDK();
-  var ref = sdk.doc(sdk.collection(db,"notifications"));
-  await sdk.setDoc(ref,{
-    notificationId:ref.id, title, message:msg,
+  if (!FB_ON || typeof firebase === "undefined") { toast("Connect Firebase to send notifications","err"); return; }
+  var nref = firebase.firestore().collection("notifications").doc();
+  await nref.set({
+    notificationId:nref.id, title, message:msg,
     targetUserId: ST.resolvedNotifUid || "broadcast",
     type:"announcement", timestamp:Date.now(), read:false,
   });
@@ -1157,13 +1135,12 @@ async function doChangePw() {
   if (n.length<6) { toast("New password: minimum 6 characters","err"); return; }
   if (n!==f) { toast("Passwords do not match","err"); return; }
   if (n===c) { toast("New password must be different","err"); return; }
-  if (!FB_ON || !window._auth) { toast("Connect Firebase to change password","err"); return; }
-  var {auth,sdk} = getSDK();
+  if (!FB_ON || typeof firebase === "undefined") { toast("Connect Firebase to change password","err"); return; }
   try {
-    var user = auth.currentUser;
-    var cred = sdk.EmailAuthProvider.credential(user.email, c);
-    await sdk.reauthenticateWithCredential(user, cred);
-    await sdk.updatePassword(user, n);
+    var user = firebase.auth().currentUser;
+    var cred = firebase.auth.EmailAuthProvider.credential(user.email, c);
+    await user.reauthenticateWithCredential(cred);
+    await user.updatePassword(n);
     ["pw-c","pw-n","pw-f"].forEach(id=>document.getElementById(id).value="");
     toast("Password updated successfully!");
   } catch(e) {
@@ -1201,6 +1178,9 @@ function toast(msg, type) {
 }
 
 // ── EXPOSE TO onclick ────────────────────────────────────────
+// Initialize Firebase auth listener (auto-login on page refresh)
+initFirebaseListeners();
+
 window.switchTab     = switchTab;
 window.doLogin       = doLogin;
 window.doRegister    = doRegister;
